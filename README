@@ -1,0 +1,86 @@
+MRtools is a module for basic image manipulation and processing
+intended to be used to create scripts with mode complex functionality.
+MRtools started as part of the ica+ package and now is grouped 
+under "MRutils package" for more generalized use.
+
+MRtools includes Methods for:
+
+Data:   Read in .nii, .nii.gz, and .img files for data manipulation
+Filter: Filtering methods for Data objects
+Match:  Matching algorithms for image to template
+Mask:   Create mask from Data object
+
+# Included scripts that use MRtools:
+AIMTemp.py: Create AIM template from nifti data
+pyMatch.py: Match image(s) to template
+melodic_hp.py Filter image data
+
+
+
+# CHANGELOG  ##################################################
+3/17/2012: Added ability to read in 3D OR 4D image
+           Added start of Mask module
+           Added print functionality to Data and Mask object
+
+# TODO ########################################################
+- visualization of images
+- saving data to mat file
+- output of data for ML
+- fix up match methods
+- update MRlog and add to package
+- update atlasimage.py and add to package
+- update voxLabel.py and add to package
+
+DOCUMENTATION AND INSTRUCTIONS
+
+# DATA ##############################################
+>> import MRtools
+
+# First will check for 4D, then 3D image
+>> Image = Mrtools.Data('myimage.nii.gz')    
+
+# Will read in 3D image, or first timepoint of 4D
+>> Image = Mrtools.Data('myimage.nii.gz','3d') 
+
+# Will read in 4D image.  If 3D given, will read as 3D
+>> Image = Mrtools.Data('myimage.nii.gz','4d')
+
+# Coordinate conversion
+>> Image.mritoRCP([x,y,z])
+>> Image.getValMNI([x,y,z])
+
+
+# FILTER ##############################################
+>> import MRtools
+>> Image = MRtools.Data('myimage.nii.gz')
+>> Filter = MRtools.Filter()
+>> Filter.isGood(Image,'timeseries.txt','frequency.txt')
+
+# MATCH ##############################################
+>> import MRtools
+>> Template = Mrtools.Data('myimage.nii.gz')
+>> Match = MRtools.Match(Template)
+>> Match.setIndexCrit(">",0)
+>> Match.genIndexMNI()
+>> Contender = MRtools.Data('contender.nii.gz')
+>> Match.addComp(Contender)
+>> Match.doTemplateMatch()
+
+# MASK ##############################################
+import MRtools
+import numpy as nu
+
+# Create binary mask from input image
+mask = MRtools.Mask('MR/test1.nii.gz')
+
+# Save mask to file
+mask.saveMask('outname')         # will be .nii
+mask.saveMask('outname.nii.gz')   
+mask.saveMask('outname.img')     
+
+# Read in image to mask
+image = MRtools.Data('MR/test2.nii.gz')
+
+# Mask image and save output
+masked = mask.applyMask(image)
+output.save('Outfolder/output.nii.gz')
