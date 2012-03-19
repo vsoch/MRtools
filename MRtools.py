@@ -538,12 +538,25 @@ class Mask:
 
 # Takes an image as input, returns masked data
     def applyMask(self,image):
-        if np.shape(self.mask.data) != np.shape(image.data):
-            print "Dimensions of mask and image not equal.  Will not mask!"
-        else:
+        # If we have 3D data
+        if len(np.shape(image.data)) < 4:
+            if np.shape(self.mask.data) != np.shape(image.data):
+                print "Dimensions of mask and image not equal.  Will not mask!"
+            else:
+                # Create new clone of data object to hold mask
+                maskedimg = copy.deepcopy(image)     
+                maskedimg.data = image.data*self.mask.data
+                return maskedimg           
+        # If we have 4D data
+        elif len(np.shape(image.data)) == 4:
             # Create new clone of data object to hold mask
             maskedimg = copy.deepcopy(image)     
-            maskedimg.data = image.data*self.mask.data
+            # Go through each timepoint and mask        
+            for t in range(1,np.shape(image.data)[3]):
+                if (np.shape(self.mask.data[0:2]) != np.shape(image.data[:,:,:,t][0:2])):
+                    print "Dimensions of mask and image not equal.  Will not mask!"
+                else:
+                    maskedimg.data[:,:,:,t] = image.data[:,:,:,t]*self.mask.data
             return maskedimg           
 
 

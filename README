@@ -14,7 +14,7 @@ Mask:   Create mask from Data object
 AIMTemp.py: Create AIM template from nifti data
 pyMatch.py: Match image(s) to template
 melodic_hp.py Filter image data
-
+MRVector.py: mask input images and extract .mat of voxel vectors
 
 
 # CHANGELOG  ##################################################
