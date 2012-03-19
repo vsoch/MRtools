@@ -32,7 +32,7 @@ OUTPUT: .mat file for loading into matlab with the following variables:
 
 __author__ = "Vanessa Sochat (vsochat@stanford.edu)"
 __version__ = "$Revision: 1.0 $"
-__date__ = "$Date: 2011/08/20 $"
+__date__ = "$Date: 2012/03/17 $"
 __license__ = "Python"
 
 import os
