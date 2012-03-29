@@ -7,8 +7,8 @@ searchlightROI --> Extract ROI coordinates for superthreshold neighborhoods
 This script takes as input a user specified threshold to apply to an input image,
 and looks voxelwise across the brain for voxels that surpass this threshold.  
 When a voxel is found, the coordinates of the voxel (we might call a centroid)
-and its surrounding voxels within a particular radius (in voxels) are extracted.
-Currently, the script will extract a rough "circle" of voxels, however 
+and its surrounding voxels within a particular distance from both sides (in voxels) 
+are extracted. Currently, the script will extract a cube of voxels, however 
 functionality might be added to extract different shapes.  Output is N space
 delimited text files, each representing one ROI with a list of voxel coordinates
 (x y z), one coordinate per line, in the following format:
