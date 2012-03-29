@@ -15,15 +15,18 @@ AIMTemp.py: Create AIM template from nifti data
 pyMatch.py: Match image(s) to template
 melodic_hp.py Filter image data
 MRVector.py: mask input images and extract .mat of voxel vectors
-
+searchlightROI.py: create text files of ROI coordinate lists
 
 # CHANGELOG  ##################################################
 3/17/2012: Added ability to read in 3D OR 4D image
            Added start of Mask module
            Added print functionality to Data and Mask object
+3/29/2010: Added "ROI" Class to MRtools
+           Added searchlightROI.py w/ square ROI functionality
 
 # TODO ########################################################
 - visualization of images
+- add other ROI shapes to searchlightROI
 - saving data to mat file
 - output of data for ML
 - fix up match methods
@@ -84,3 +87,15 @@ image = MRtools.Data('MR/test2.nii.gz')
 # Mask image and save output
 masked = mask.applyMask(image)
 output.save('Outfolder/output.nii.gz')
+
+# ROI ##############################################
+>> import MRtools
+>> Image = MRtools.Data('myimage.nii.gz')
+
+# Create ROI object to extract ROIs that surpass thresh
+# size is units from centroid that passes thresh
+>> ROI = MRtools.ROI(thresh,size,output)
+
+# Return list of lists, each has coordinates for ROI
+# The centroid is the first coordinate
+>> ROIlists = ROI.applySquareROI(img)

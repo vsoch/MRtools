@@ -2,7 +2,7 @@
 
 """AIMTemplate for Python
 
-This script takes a nifti image as input and using the MRtrans class, creates
+This script takes a nifti image as input and using the MRtools class, creates
 a template XML file for use with AIM (Annotation and Image Markup).  The 
 output image name, if not specified, will be the same as the input image.xml
 To produce standard output, the output will be of the same dimensions as the

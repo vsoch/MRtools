@@ -14,29 +14,8 @@ a query for a value in MNI space to the stored image data.  The class uses nibab
 and numpy to read and manipulate the data.  Currently only "result" images with 1
 timepoint are supported, as the script is intended for comparison between 3D images.
 
-SAMPLE USAGE: Make sure script is somewhere on your path
+SAMPLE USAGE: Please see README included with package
 
-To use Data class:
->> import MRtools
->> Image = Mrtools.Data('myimage.nii.gz')
->> Image.mritoRCP([x,y,z])
->> Image.getValMNI([x,y,z])
-
-To use Filter class with Group Network Image:
->> import MRtools
->> Image = MRtools.Data('myimage.nii.gz')
->> Filter = MRtools.Filter()
->> Filter.isGood(Image,'timeseries.txt','frequency.txt')
-
-To use Match class with Image:
->> import MRtools
->> Template = Mrtools.Data('myimage.nii.gz')
->> Match = MRtools.Match(Template)
->> Match.setIndexCrit(">",0)
->> Match.genIndexMNI()
->> Contender = MRtools.Data('contender.nii.gz')
->> Match.addComp(Contender)
->> Match.doTemplateMatch()
 
 """
 
@@ -856,6 +835,117 @@ class Match:
             print comname + " absolute activation overlap score: " + str(activation_overlapabs[com.name]) + "\n"
         return activation_overlap,activation_overlapabs
 
+# ROI------------------------------------------------------------------------------
+class ROI:
+    def __init__(self,thresh,roisize,outname):
+        self._roisize = roisize + 1
+        self._outname = outname
+        self._thresh = thresh
+
+    # Returns the number of voxels based on threshold
+    def numVox(self):
+        print "To be written"
+
+    # Applies the ROI to an image (MRtools Data object)
+    # returns a list with lists of voxels, each ROI separted by an empty list 
+    # the centroid of the ROI is the first in the list
+    def applySquareROI(self,MR):
+        # Apply ROI to all voxels
+        # Equation for sphere with center (a,b,c) is:
+        # (x-a)^2 + (y-b)^2 + (z-c)^2 = r^2
+
+        # Create variable to hold lists of voxels
+        voxlists = []
+        print "Will create square ROIs " + str(self._roisize -1) + " units from centroid"
+
+        # Check if image is 3D or 4D
+        if MR.dim == "3d":            
+            # Search all voxels
+            for x in range(0,np.shape(MR.data)[0]):
+                for y in range(0,np.shape(MR.data)[1]):
+                    for z in range(0,np.shape(MR.data)[2]):
+                        # Reset temp array to hold coordinates
+                        self.templist = []
+                        # If we pass a particular threshold
+                        if MR.data[x,y,z] >= self._thresh:
+                            # Find neighbors and add to list
+                            # This function will also include centroid
+                            neighbors = self.getSquareNeighbors([x,y,z])
+                            for neighbor in neighbors:
+                                self.addCoord(MR.rcptoMNI([neighbor[0],neighbor[1],neighbor[2]]))
+                            voxlists.append(self.templist)
+
+        elif MR.dim == "4d":
+            # Search all voxels
+            for x in range(0,np.shape(MR.image)[0]):
+                for y in range(0,np.shape(MR.image)[1]):
+                    for z in range(0,np.shape(MR.image)[2]):
+                        for t in range(0,np.shape(MR.image)[3]):
+                            # Reset temp array to hold coordinates
+                            self.templist = []
+                            # If we pass a particular threshold
+                            if MR.data[x,y,z] >= self._thresh:
+                                # Find neighbors and add to list
+                                # This function will also include centroid
+                                neighbors = self.getSquareNeighbors([x,y,z])
+                                for neighbor in neighbors:
+                                    self.addCoord(MR.rcptoMNI([neighbor[0],neighbor[1],neighbor[2]]),t)
+                                voxlists.append(self.templist)
+ 
+        return voxlists 
+
+    # Returns neighbors of centroid within radius r
+    def getSphereNeighbors(self,center):
+
+        # DOES NOT WORK - DO NOT USE
+        # Modified from pyMVPA Sphere object
+        crange = np.ceil(self._roisize / np.ones(3))
+        increment = np.array(list(np.ndindex(tuple(crange*2 + 1))))-crange
+        # Filter out beyond the "sphere"
+        return np.array([iny for iny in increment if np.linalg.norm(iny * np.ones(3)-center) <= self._roisize])
+
+    # Returns neighbors of centroid within square with side length roisize
+    def getSquareNeighbors(self,center):
+
+        coordlist = []
+
+        # We will move this distance in each direction
+        LR = self.boxExtent(center[0],self._roisize)[1:]
+        UD = self.boxExtent(center[1],self._roisize)[1:]
+        FB = self.boxExtent(center[2],self._roisize)[1:] 
+        
+        # Create list of voxel coordinates from box
+        for m in LR:
+            for o in UD:
+                for v in FB:
+                    coordlist.append([m,o,v])
+        return coordlist
+
+    # Returns array of coordinates in one dimension to define a box
+    def boxExtent(self,coord,numvoxout):
+        extent = []
+        for r in xrange(0,numvoxout): 
+            extent.append(coord+r) 
+            extent.append(coord-r)
+        return extent
+        
+
+    # Adds a coordinate to the list
+    def addCoord(self,xyz,t=None):
+        # 4D data
+        if t: self.templist.append(str(xyz[0]) + " " + str(xyz[1]) + " " + str(xyz[2]) + " " + str(xyz[3])) 
+        # 3D data
+        else: self.templist.append(str(xyz[0]) + " " + str(xyz[1]) + " " + str(xyz[2]))
+ 
+
+# METRIC ------------------------------------------------------------------------------
+class METRIC:
+    def __init__():
+        print "Created metric..."
+
+    # Return cartesian distance
+    def cartesian(self,x,y):
+        return np.linalg.norm(x-y)
 
 # MAIN ----------------------------------------------------------------------------------
 def main():
