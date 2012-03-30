@@ -854,8 +854,9 @@ class ROI:
         # Equation for sphere with center (a,b,c) is:
         # (x-a)^2 + (y-b)^2 + (z-c)^2 = r^2
 
-        # Create variable to hold lists of voxels
-        voxlists = []
+        # Create variables to hold lists of voxels
+        voxRCP = []
+        voxCOORD = []
         print "Will create square ROIs " + str(self._roisize -1) + " units from centroid"
 
         # Check if image is 3D or 4D
@@ -864,16 +865,19 @@ class ROI:
             for x in range(0,np.shape(MR.data)[0]):
                 for y in range(0,np.shape(MR.data)[1]):
                     for z in range(0,np.shape(MR.data)[2]):
-                        # Reset temp array to hold coordinates
-                        self.templist = []
+                        # Reset temp arrays to hold coordinates
+                        tempRCP = []
+                        tempCOORD = []
                         # If we pass a particular threshold
                         if MR.data[x,y,z] >= self._thresh:
                             # Find neighbors and add to list
                             # This function will also include centroid
                             neighbors = self.getSquareNeighbors([x,y,z])
                             for neighbor in neighbors:
-                                self.addCoord(MR.rcptoMNI([neighbor[0],neighbor[1],neighbor[2]]))
-                            voxlists.append(self.templist)
+                                tempCOORD = self.addCoord(MR.rcptoMNI([neighbor[0],neighbor[1],neighbor[2]]),tempCOORD)
+                                tempRCP = self.addCoord([neighbor[0],neighbor[1],neighbor[2]],tempRCP) 
+                            voxCOORD.append(tempCOORD)
+                            voxRCP.append(tempRCP)
 
         elif MR.dim == "4d":
             # Search all voxels
@@ -882,17 +886,19 @@ class ROI:
                     for z in range(0,np.shape(MR.image)[2]):
                         for t in range(0,np.shape(MR.image)[3]):
                             # Reset temp array to hold coordinates
-                            self.templist = []
+                            tempRCP = []
+                            tempCOORD = []
                             # If we pass a particular threshold
                             if MR.data[x,y,z] >= self._thresh:
                                 # Find neighbors and add to list
                                 # This function will also include centroid
                                 neighbors = self.getSquareNeighbors([x,y,z])
                                 for neighbor in neighbors:
-                                    self.addCoord(MR.rcptoMNI([neighbor[0],neighbor[1],neighbor[2]]),t)
-                                voxlists.append(self.templist)
- 
-        return voxlists 
+                                    tempCOORD = self.addCoord(MR.rcptoMNI([neighbor[0],neighbor[1],neighbor[2]]),tempCOORD,t)
+                                    tempRCP = self.addCoord([neighbor[0],neighbor[1],neighbor[2]],tempRCP,t)
+                                voxCOORD.append(tempCOORD)
+                                voxRCP.append(tempRCP)
+        return voxCOORD,voxRCP 
 
     # Returns neighbors of centroid within radius r
     def getSphereNeighbors(self,center):
@@ -931,11 +937,15 @@ class ROI:
         
 
     # Adds a coordinate to the list
-    def addCoord(self,xyz,t=None):
+    def addCoord(self,xyz,coordarray,t=None):
         # 4D data
-        if t: self.templist.append(str(xyz[0]) + " " + str(xyz[1]) + " " + str(xyz[2]) + " " + str(xyz[3])) 
+        if t: 
+            coordarray.append(str(xyz[0]) + " " + str(xyz[1]) + " " + str(xyz[2]) + " " + str(xyz[3]))
+            return coordarray 
         # 3D data
-        else: self.templist.append(str(xyz[0]) + " " + str(xyz[1]) + " " + str(xyz[2]))
+        else: 
+            coordarray.append(str(xyz[0]) + " " + str(xyz[1]) + " " + str(xyz[2]))
+            return coordarray
  
 
 # METRIC ------------------------------------------------------------------------------

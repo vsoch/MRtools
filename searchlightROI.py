@@ -64,6 +64,7 @@ def checkInput(imginput):
 # Print lists to text files
 def printList(ROIS,outfile):
     N = 1
+    fileall = open(outfile + "_all" + ".roi",'w')
     for roi in ROIS:
         # Open file for writing
         fopen = open(outfile + "_" + str(N) + ".roi",'w')
@@ -71,6 +72,18 @@ def printList(ROIS,outfile):
             fopen.writelines(str(coord) + "\n")
         fopen.close()
         N = N +1
+    noDups = ridDups(ROIS)
+    for coord in noDups:
+       fileall.writelines(str(coord) + "\n")
+    fileall.close()
+
+def ridDups(array):
+    uniques = []
+    for e in array:
+        for o in e:
+            if o not in uniques:
+                uniques.append(o)
+    return uniques    
     
 
 # MAIN ----------------------------------------------------------------------------------
@@ -107,13 +120,14 @@ def main(argv):
     ROI = MRtools.ROI(thresh,size,output)
     
     if roitype == "square":
-        applied = ROI.applySquareROI(img)
+        voxCOORD,voxRCP = ROI.applySquareROI(img)
     else:
         print "ROI type " + str(roitype) + " currently not supported."
         sys.exit()
 
     # Print ROI entries to individual text files
-    printList(applied,output)
+    printList(voxCOORD,output + ".xyz")
+    printList(voxRCP,output + ".rcp")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
