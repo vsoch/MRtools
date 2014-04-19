@@ -125,14 +125,14 @@ def checkInput(subinput,compinput):
    found = dict()
    count = 0
    for sub in subinput:
-   tmp = list() 
-       if sub:
-           for comp in compinput:
-               if os.path.isfile(sub + "/" + comp):
-                   tmp.append(sub + "/" + comp)
-                   count = count + 1
-           print "Found " + str(len(tmp)) + " components for subject " + sub + "!"
-           found[sub] = tmp
+     tmp = list() 
+     if sub:
+       for comp in compinput:
+         if os.path.isfile(sub + "/" + comp):
+           tmp.append(sub + "/" + comp)
+           count = count + 1
+       print "Found " + str(len(tmp)) + " components for subject " + sub + "!"
+       found[sub] = tmp
    if count == 0:
      print "No subject images found - analysis will not be continued."
      sys.exit(32) 
