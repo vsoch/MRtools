@@ -13,7 +13,7 @@ INPUT:
 -t --template=  Path to image to display for template
 -o --oname=     Name for output folder in PWD
 
-USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png -oname=thresh1
+USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png --oname=thresh1
 
 OUTPUT: report.html and images in oname directory in pwd
 
@@ -36,23 +36,24 @@ def usage():
     print __doc__
 
 # Print HTML report with motion charts for flagged subjects
-def printHTML(output,result):
+def printHTML(output,result,maxscore,maxid):
     if not os.path.isfile(output + "/report.html"):
         print "Creating results HTML report in " + output + "..."
         report = open(output + "/report.html",'w')
-        report.write("<html>\n<body>\n<h1>pyCorr Result Report</h1>\n")
+        report.write("<html>\n<body>\n<h1>MRTools Result Report</h1>\n")
         report.write("<a href=\"result.txt\">Text Report</a>")
         report.write("<p><strong>Template: </strong>: " + output + "</p>\n")
 	
 	# Print the template image
-        report.write("<img src=\"img/template.png\" />\"\n")
+        report.write("<img src=\"img/template.png\" /><br>\"\n")
 	
         # Cycle through list of results, print name and links to component images:
+        report.write("<strong>Top Score: " + str(maxscore) + " Image: " + str(maxid) + "\n")
         report.write("<h1>Top Three Matched Components per Subject</h1>\n<p>")
         for res in result:
 	    report.write("<p><strong>" + res[0] + "</strong></p>\n")
 	    for i in [1,3,5]:
-	        report.write("<img src=\"" + res[i] + "\" width=\"30%\" height=\"30%\" />\"")
+	        report.write("<img src=\"" + res[i] + "\" width=\"30%\" />\"")
 	    report.write("<br /><br />\n")
             report.write("Matching Scores: <strong>1)</strong> " + str(res[2]) + " <strong>2)</strong> " + str(res[4]) + "<strong> 3) </strong> " + str(res[6])) 
             report.write("<br /><br />\n")
@@ -65,6 +66,8 @@ def printHTML(output,result):
 def readInput(readfile):
     result = []
     print "Reading input file " + readfile
+    maxscore = 0
+    maxid = None
     try:
         rfile = open(readfile,'r')
 	for line in rfile:
@@ -72,11 +75,14 @@ def readInput(readfile):
 	    sub,match1,val1,match2,val2,match3,val3 = line.split(" ")
             if sub not in ("ID"):
                 result.append([sub.rstrip(),match1.rstrip(),val1.rstrip(),match2.rstrip(),val2.rstrip(),match3.rstrip(),val3.rstrip().rstrip("\n")])
+                if val1 >= maxscore: maxscore = val1; maxid = sub
+                if val2 >= maxscore: maxscore = val2; maxid = sub
+                if val3 >= maxscore: maxscore = val3; maxid = sub
         rfile.close()
     except:
         print "Cannot open file " + readfile + ". Exiting"
         sys.exit()
-    return result
+    return result,maxscore,maxid
 
 # Get full paths for components and subject folders
 def fullPaths(result):
@@ -90,11 +96,10 @@ def fullPaths(result):
     for res in result:
         # First grab the path up to the subject .ica folder
 	ica = re.compile(".ica")
-	ica.search(res[0])
-	found = ica.search(res[0])
-
-	# Replace this path with the path to the subject report folder        
-	result[count][0] = res[0][0:found.start()+4]
+	matches = [(m.start(0), m.end(0)) for m in ica.finditer(res[0])]
+	
+        # Replace this path with the path to the subject report folder        
+	result[count][0] = res[0][0:matches[len(matches)-1][1]]
         
         # Now extract the thresh_zstat number and match to the report png image
         for i in [1,3,5]:
@@ -124,9 +129,8 @@ def setupOut(output,tempimg,result,infile):
     # Copy each subject image into the image folder, number subjects 1 to N
     count = 0
     for res in result:
-    print res
         for i in [1,3,5]:
-            shutil.copy(res[0] + "/stats/report/" + res[i],output + "/img/" + str(count + 1) + res[i]) 
+            shutil.copy(res[0] + "/report/" + res[i],output + "/img/" + str(count + 1) + res[i]) 
 	    result[count][i] = "img/" + str(count + 1) + res[i]
 	count = count + 1
 
@@ -154,7 +158,7 @@ def main(argv):
             tempimg = arg
 
     # Read in text file input
-    rawres = readInput(input1)
+    rawres,maxscore,maxid = readInput(input1)
 
     # Convert image paths to .png paths
     pathres = fullPaths(rawres)
@@ -163,7 +167,7 @@ def main(argv):
     linkres = setupOut(output,tempimg,pathres,input1)
 
     # Print HTML report
-    printHTML(output,linkres)
+    printHTML(output,linkres,maxscore,maxid)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
