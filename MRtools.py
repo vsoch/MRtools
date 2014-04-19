@@ -79,9 +79,9 @@ class Data:
 
 # READ DATA FUNCTIONS
     def readDim(self):
-        self.xdim = self.img.get_shape()[0]
-        self.ydim = self.img.get_shape()[1]
-        self.zdim = self.img.get_shape()[2]
+        self.xdim = self.img.shape[0]
+        self.ydim = self.img.shape[1]
+        self.zdim = self.img.shape[2]
 
 # READ AFFINE TRANSFORMATION MATRIX
     def readAff(self):
