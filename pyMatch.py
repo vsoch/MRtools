@@ -119,16 +119,24 @@ def readInput(readfile):
     return flist
 
 # Check that all component files exist for each subject
+# Return dict of images that are found
 def checkInput(subinput,compinput):
-   print "Checking for all components images for each output/subject..." 
+   print "Checking for all components images for each output/subject..."
+   found = dict()
+   count = 0
    for sub in subinput:
+   tmp = list() 
        if sub:
            for comp in compinput:
-               if not os.path.isfile(sub + "/" + comp):
-                   print "Cannot find " + comp + " for " + sub + ". Exiting!"
-                   sys.exit()
-   print "All components for all subjects have been found!  Continuing analysis..." 
-    
+               if os.path.isfile(sub + "/" + comp):
+                   tmp.append(sub + "/" + comp)
+                   count = count + 1
+           print "Found " + str(len(tmp)) + " components for subject " + sub + "!"
+           found[sub] = tmp
+   if count == 0:
+     print "No subject images found - analysis will not be continued."
+     sys.exit(32) 
+   return found 
 
 # MAIN ----------------------------------------------------------------------------------
 def main(argv):
@@ -158,7 +166,8 @@ def main(argv):
     imgfiles = readInput(input2)
 
     # Check that all components exist for each subject
-    checkInput(subfile,imgfiles)
+    # Return a dict of found images for each sub (index)
+    found = checkInput(subfile,imgfiles)
         
     # Read in template image to MRtools Data object, and get xyz and raw data
     Template = MRtools.Data(input1,'3D')
@@ -184,59 +193,59 @@ def main(argv):
                     
     # Note that "subject" might also be a group .gica folder, or a dual regression results folder, however the idea is the same  
     # This script assumes that input image lists have already been filtered, etc.
- 
-    for subject in subfile:
-        if subject:
-            print "Computing similarity scores for images in directory " + subject    
+
+    print "Computing similarity scores..."    
+    for subject,images in found.iteritems():
+      print "Processing images for subject " + sub + "..."
+      for img_current in images:
+        if img_current:
 
             # If submit by the ica+ script, the "subject" is a specified DR result folder
             # and the images to match are those whose IC components have passed filtering
             # the DR images and IC networks that pass filter results are in the original
             # gica directory under "filter"
                 
-            for img in imgfiles:
-                img_current = subject + "/" + img
                     
-                try:
-                    # Use MRtools Data class to read in image
-                    Contender = MRtools.Data(img_current,'3D')
-                    # Since these have already been selected from filtered IC networks, we add each one
-                    Match.addComp(Contender)
-                except:
-                    print "Problem with " + img + " for output " + subject + ". Exiting!"
-		    sys.exit()    
+          try:
+              # Use MRtools Data class to read in image
+              Contender = MRtools.Data(img_current,'3D')
+              # Since these have already been selected from filtered IC networks, we add each one
+              Match.addComp(Contender)
+          except:
+              print "Problem with " + img_current ". Exiting!"
+              sys.exit()    
                     
-            # DO TEMPLATE MATCHING
-            # Get dictionaries of activation overlap scores, and activation overlap absolute value scores
-            # There is one for each subject, indexed by the component image name
-            activation_overlap,activation_overlapabs = Match.matchOverlap()
+      # DO TEMPLATE MATCHING
+      # Get dictionaries of activation overlap scores, and activation overlap absolute value scores
+      # There is one for each subject, indexed by the component image name
+      activation_overlap,activation_overlapabs = Match.matchOverlap()
 
-            # CHOOSE TOP RESULTS ----------------------------------------------------------------------------------	
-            # When we finish cycling through the components, we want to find the top three matching (the most similar) components
-	    # We rank with activation_overlapabs, which is looking at absolute activation values (negative and positive Z ranked equally)
+      # CHOOSE TOP RESULTS ----------------------------------------------------------------------------------	
+      # When we finish cycling through the components, we want to find the top three matching (the most similar) components
+      # We rank with activation_overlapabs, which is looking at absolute activation values (negative and positive Z ranked equally)
 			
-	    topmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-1])
-	    secondmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-2])
-	    thirdmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-3])
+      topmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-1])
+      secondmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-2])
+      thirdmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-3])
 
-	    # Print information about the top three to the final results log
-            # VANESSA - IT MIGHT MAKE SENSE TO PRINT ALL RESULTS, AND THEN USE NUMERICAL FILTER WHEN WE SELECT TO GENERATE AIM TEMPLATES FOR...
-	    resultitem = [subject,os.path.basename(topmatch[0]),topmatch[1],os.path.basename(secondmatch[0]),secondmatch[1],os.path.basename(thirdmatch[0]),thirdmatch[1]]	
-	    Result.addResult(resultitem)
+      # Print information about the top three to the final results log
+      # VANESSA - IT MIGHT MAKE SENSE TO PRINT ALL RESULTS, AND THEN USE NUMERICAL FILTER WHEN WE SELECT TO GENERATE AIM TEMPLATES FOR...
+      resultitem = [subject,os.path.basename(topmatch[0]),topmatch[1],os.path.basename(secondmatch[0]),secondmatch[1],os.path.basename(thirdmatch[0]),thirdmatch[1]]
+      Result.addResult(resultitem)
 
-            # Add full paths to images to bestcomps.txt file, to create AIM templates for
-            Result.addImages([str(topmatch[0]) + ":" + str(topmatch[1]),str(secondmatch[0]) + ":" + str(secondmatch[1]),str(thirdmatch[0]) + ":" + str(thirdmatch[1])])
+      # Add full paths to images to bestcomps.txt file, to create AIM templates for
+      Result.addImages([str(topmatch[0]) + ":" + str(topmatch[1]),str(secondmatch[0]) + ":" + str(secondmatch[1]),str(thirdmatch[0]) + ":" + str(thirdmatch[1])])
 
-            print "Top matches for " + Template.name + " are:"
-            print "    1) " + str(os.path.basename(topmatch[0]))
-            print "    2) " + str(os.path.basename(secondmatch[0]))
-            print "    3) " + str(os.path.basename(thirdmatch[0])) + "\n"
+      print "Top matches for " + Template.name + " are:"
+      print "    1) " + str(os.path.basename(topmatch[0]))
+      print "    2) " + str(os.path.basename(secondmatch[0]))
+      print "    3) " + str(os.path.basename(thirdmatch[0])) + "\n"
 
-            print "Full results printed to: " + Result.getFullPath()
-            print "Image list printed to: " + Result.getImPath()
+      print "Full results printed to: " + Result.getFullPath()
+      print "Image list printed to: " + Result.getImPath()
 
-            # Clear the Match object to prepare for the next subject or group, if applicable
-            Match.reset()
+      # Clear the Match object to prepare for the next subject or group, if applicable
+      Match.reset()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
