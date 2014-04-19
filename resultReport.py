@@ -124,6 +124,7 @@ def setupOut(output,tempimg,result,infile):
     # Copy each subject image into the image folder, number subjects 1 to N
     count = 0
     for res in result:
+    print res
         for i in [1,3,5]:
             shutil.copy(res[0] + "/stats/report/" + res[i],output + "/img/" + str(count + 1) + res[i]) 
 	    result[count][i] = "img/" + str(count + 1) + res[i]
