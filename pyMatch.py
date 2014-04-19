@@ -212,7 +212,7 @@ def main(argv):
               # Since these have already been selected from filtered IC networks, we add each one
               Match.addComp(Contender)
           except:
-              print "Problem with " + img_current ". Exiting!"
+              print "Problem with " + img_current + ". Exiting!"
               sys.exit()    
                     
       # DO TEMPLATE MATCHING
