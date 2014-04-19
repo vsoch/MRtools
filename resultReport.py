@@ -13,7 +13,7 @@ INPUT:
 -t --template=  Path to image to display for template
 -o --oname=     Name for output folder in PWD
 
-USAGE: python resultReport.py --report=thresh_zstat1.nii_bestcomps.txt --template=/path/to/image.png -oname=thresh1
+USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png -oname=thresh1
 
 OUTPUT: report.html and images in oname directory in pwd
 
@@ -70,7 +70,7 @@ def readInput(readfile):
 	for line in rfile:
 	    line = line.rstrip("\n").rstrip(" ").rstrip()
 	    sub,match1,val1,match2,val2,match3,val3 = line.split(" ")
-            if sub not in ("SubID"):
+            if sub not in ("ID"):
                 result.append([sub.rstrip(),match1.rstrip(),val1.rstrip(),match2.rstrip(),val2.rstrip(),match3.rstrip(),val3.rstrip().rstrip("\n")])
         rfile.close()
     except:
