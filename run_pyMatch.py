@@ -1,6 +1,5 @@
 #!/python-lapack-blas/bin/python
 
-from os import system
 import os
 
 # Here we can generate thresh_zstat list
