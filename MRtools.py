@@ -399,8 +399,8 @@ class Print:
       # Now create the png
       slicey = fsl.Slicer()
       slicey.inputs.in_file = "MR/tmp.nii.gz"
-      slicey.inputs.all_axial = True
       slicey.inputs.image_width = 750
+      slicey.inputs.all_axial = True
       slicey.inputs.out_file = self.outname
       slicey.run() 
 
