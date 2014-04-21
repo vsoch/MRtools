@@ -373,7 +373,7 @@ class Data:
 
 # Print ------------------------------------------------------------------------------
 class Print:
-     '''Print png of image file'''
+    '''Print png of image file'''
 
     def __init__(self,image,outname):
         self.outname = outname
