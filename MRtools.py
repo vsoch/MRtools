@@ -371,15 +371,27 @@ class Data:
         except:
             print "Error saving file.  Should end in .nii, .nii.gz, or .img"
 
-# Print png file of image, sliced on anatomical image
-    def png(self,inputmr,outname):
+# Print ------------------------------------------------------------------------------
+class Print:
+     ''''Print png of image file'''
+
+    def __init__(self,image,outname):
+        self.outname = outname
+        self.img = image
+     
+    def __repr__(self):
+        return self.image + ":" + self.outname
+
+
+    # Print png file of image, sliced on anatomical image
+    def png(self):
       # First do the overlay
       from nipype.interfaces import fsl
       combine = fsl.Overlay()
       combine.inputs.background_image = 'MR/MNI152.nii.gz'
       combine.inputs.auto_thresh_bg = True
       combine.inputs.stat_thresh = (0, 100)
-      combine.inputs.stat_image = inputmr
+      combine.inputs.stat_image = self.img
       combine.inputs.show_negative_stats = True
       combine.inputs.out_file = 'MR/tmp.nii.gz'
       combine.run() 
@@ -389,7 +401,7 @@ class Data:
       slicey.inputs.in_file = "MR/tmp.nii.gz"
       slicey.inputs.all_axial = True
       slicey.inputs.image_width = 750
-      slicey.inputs.out_file = outname
+      slicey.inputs.out_file = self.outname
       slicey.run() 
 
 
