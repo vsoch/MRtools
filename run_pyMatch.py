@@ -21,14 +21,16 @@ templates = open('templates.txt','r').readlines()
 for temp in templates:
   tmp = temp.strip("\n")
   template = templatedir + "/" + tmp
-  # Create a script to submit job
-  filey = open('.jobs/' + tmp + '.job','w')
-  filey.writelines("#!/bin/bash\n")
-  filey.writelines("#SBATCH --job-name=" + tmp + "\n")  
-  filey.writelines("#SBATCH --output=.out/" + tmp + ".out\n")  
-  filey.writelines("#SBATCH --error=.out/" + tmp + ".err\n")  
-  filey.writelines("#SBATCH --mem=8000\n")
-  filey.writelines("/home/vsochat/python-lapack-blas/bin/python pyMatch.py --template=" + template + " --images=" + images + " --subs=" + subs + " --output=" + outdir)
-  filey.close()
-  os.system("sbatch .jobs/" + tmp + ".job")
+  fname = outdir + "/" + tmp.strip('.gz') + "_bestcomps.txt"
+  if not os.path.isfile(fname):
+    # Create a script to submit job
+    filey = open('.jobs/' + tmp + '.job','w')
+    filey.writelines("#!/bin/bash\n")
+    filey.writelines("#SBATCH --job-name=" + tmp + "\n")  
+    filey.writelines("#SBATCH --output=.out/" + tmp + ".out\n")  
+    filey.writelines("#SBATCH --error=.out/" + tmp + ".err\n")  
+    filey.writelines("#SBATCH --mem=8000\n")
+    filey.writelines("/home/vsochat/python-lapack-blas/bin/python pyMatch.py --template=" + template + " --images=" + images + " --subs=" + subs + " --output=" + outdir)
+    filey.close()
+    os.system("sbatch .jobs/" + tmp + ".job")
 
