@@ -52,7 +52,7 @@ class Data:
             self.readData(dim)  # Will read data as 3D (first timepoint)
                                 # or 4D (timeseries).  If dim is not defined,
                                 # will try 4D and then 3D       
-	    self.readAff()
+            self.readAff()
                         
             self.XYZ = []       # XYZ coordinates to match raw data
             self.RCP = []       # "raw coordinate points"
@@ -370,7 +370,28 @@ class Data:
             nib.save(new_image,outname)
         except:
             print "Error saving file.  Should end in .nii, .nii.gz, or .img"
-    
+
+# Print png file of image, sliced on anatomical image
+    def png(self,inputmr,outname):
+      # First do the overlay
+      from nipype.interfaces import fsl
+      combine = fsl.Overlay()
+      combine.inputs.background_image = 'MR/MNI152.nii.gz'
+      combine.inputs.auto_thresh_bg = True
+      combine.inputs.stat_thresh = (0, 100)
+      combine.inputs.stat_image = inputmr
+      combine.inputs.show_negative_stats = True
+      combine.inputs.out_file = 'MR/tmp.nii.gz'
+      combine.run() 
+
+      # Now create the png
+      slicey = fsl.Slicer()
+      slicey.inputs.in_file = "MR/tmp.nii.gz"
+      slicey.inputs.all_axial = True
+      slicey.inputs.image_width = 750
+      slicey.inputs.out_file = outname
+      slicey.run() 
+
 
 # Filter------------------------------------------------------------------------------
 class Filter:

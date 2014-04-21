@@ -9,9 +9,10 @@ report for visually seeing the matched images.
 
 INPUT:
 -h, --help      Print this usage
--r --report=    Text report file
+-r --report=    Single text report file (--number=s) OR folder with multiple reports (--number=m)
 -t --template=  Path to image to display for template
 -o --oname=     Name for output folder in PWD
+-n --number     s for single report, m for multiple reports in one folder
 
 USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png --oname=thresh1
 
@@ -62,10 +63,11 @@ def printHTML(output,result,maxscore,maxid):
         report.write("</body>\n</html>")
         report.close()
 
+# PRINT OUTPUT FOR ONE TEMPLATE FILE
 # Reads single column text file, returns list
-def readInput(readfile):
+def readInputSingle(readfile):
     result = []
-    print "Reading input file " + readfile
+    print "Reading single input file " + readfile
     maxscore = 0
     maxid = None
     try:
@@ -83,6 +85,40 @@ def readInput(readfile):
         print "Cannot open file " + readfile + ". Exiting"
         sys.exit()
     return result,maxscore,maxid
+
+# PRINT OUTPUT FOR MULTIPLE FILES IN ONE FOLDER
+def readInputMulti(folder):
+
+    # Get report files in folder
+    infiles = []
+    for filey in os.listdir(folder):
+      if filey.endswith("beststats.txt"):
+        infiles.append(filey)
+
+    # We will need to save a dictionary of images
+    # For each image, we save the top match score across all maps
+    mrs = dict()
+    print "Reading " + str(len(infiles)) + " input files..."
+    for f in infiles:
+      try:
+          result = []
+          rfile = open(readfile,'r')
+            for line in rfile:
+              line = line.rstrip("\n").rstrip(" ").rstrip()
+              sub,match1,val1,match2,val2,match3,val3 = line.split(" ")
+            if sub not in ("ID"):
+                result.append([sub.rstrip(),match1.rstrip(),val1.rstrip(),match2.rstrip(),val2.rstrip(),match3.rstrip(),val3.rstrip().rstrip("\n")])
+                if val1 >= maxscore: maxscore = val1; maxid = sub
+                if val2 >= maxscore: maxscore = val2; maxid = sub
+                if val3 >= maxscore: maxscore = val3; maxid = sub
+          rfile.close()
+      except:
+          print "Cannot open file " + f + ". Exiting"
+          sys.exit()
+      
+      return result,maxscore,maxid
+
+    
 
 # Get full paths for components and subject folders
 def fullPaths(result):
@@ -139,7 +175,7 @@ def setupOut(output,tempimg,result,infile):
 # MAIN ----------------------------------------------------------------------------------
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hr:o:t:", ["help","report=","oname=","template="])
+        opts, args = getopt.getopt(argv, "hr:o:t:n:", ["help","report=","oname=","template=","number="])
 
     except getopt.GetoptError:
         usage()
@@ -156,9 +192,21 @@ def main(argv):
             output = arg
         if opt in ("-t","--template"):
             tempimg = arg
+        if opt in ("-n","--number"):
+            number = arg
 
-    # Read in text file input
-    rawres,maxscore,maxid = readInput(input1)
+    if number not in ("s","n"):
+      usage()
+      print "ERROR: Please specify s (single) or m (multiple) for report type"
+      sys.exit(32)
+
+    if number == "s":
+      # Read in text file input
+      print "Generating single report..."
+      rawres,maxscore,maxid = readInputSingle(input1)
+    elif number == "m":
+      print "Generating multiple file report..."
+      rawres,maxscore,maxid = readInputMulti(input1)
 
     # Convert image paths to .png paths
     pathres = fullPaths(rawres)
