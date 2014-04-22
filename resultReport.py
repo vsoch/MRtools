@@ -68,26 +68,30 @@ def printHTML(output,result,maxscore,maxid,number):
             page =  open(output + "/" + term + ".html",'w')
             # First print the template image
             page.write("<html>\n<body>\n<h1>" + term.upper() + " Matched Images</h1>\n")
-            page.write("<p><strong>Template: </strong>: " + output + "</p>\n")
             # Print the template image
             page.write("<img src=\"img/" + term + ".png\" /><br>\"\n")
             # Now for each result, print images - order by match score
             paths = []; scores = []
-            for res in matches:
-              pathy,score = res.split('||')
-              paths.append(pathy)
-              scores.append(float(score))
-            # Order by match score
-            idx = [i[0] for i in sorted(enumerate(scores), key=lambda x:x[1])]
-            print idx
-            paths = paths[idx]
-            scores = scores[idx]
-            for i in range(0,len(paths)):
-              pathy = paths[i]
-              score = scores[i]
-              page.write("<p><strong>" + score + "</strong></p>\n")
+            if not isinstance(matches,list):
+              pathy,score = matches.split("||")
+              page.write("<p><strong>" + str(score) + "</strong></p>\n")
               page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
-	      page.write("<br /><br />\n")
+              page.write("<br /><br />\n")
+            else:
+              for res in matches:
+                pathy,score = res.split('||')
+                paths.append(pathy)
+                scores.append(float(score))
+              # Order by match score
+              idx = [i[0] for i in sorted(enumerate(scores), key=lambda x:x[1])]
+              paths = [paths[i] for i in idx]
+              scores = [scores[i] for i in idx]
+              for i in range(0,len(paths)):
+                pathy = paths[i]
+                score = scores[i]
+                page.write("<p><strong>" + str(score) + "</strong></p>\n")
+                page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
+	        page.write("<br /><br />\n")
             page.write("</body>\n</html>")
             page.close()  
         report.write("</body>\n</html>")
@@ -166,6 +170,7 @@ def readInputMulti(folder):
     # At this point, we have a dictionary of component image paths, each matched to a top term
     return mrs
 
+
 # Get full paths for components and subject folders
 def fullPaths(result,number):
     
@@ -229,7 +234,10 @@ def termMatch(pngs):
        finalres[term] = mrpath + '||' + score
      else:
        holder = finalres[term]
-       holder.append(mrpath + '||' + score)
+       if not isinstance(holder,list):
+         holder = [holder, mrpath + '||' + score]
+       else:
+         holder.append(mrpath + '||' + score)
        finalres[term] = holder
    return finalres
 
@@ -263,7 +271,7 @@ def setupOut(output,tempimg,result,infile,number):
       finalpaths = dict()
       for png, val in result.iteritems():
         shutil.copy(png,output + "/img/" + str(count + 1) + png.split('/')[-1]) 
-        finalpaths[output + "/img/" + str(count + 1) + png.split('/')[-1]] = val
+        finalpaths["/img/" + str(count + 1) + png.split('/')[-1]] = val
         count = count + 1
       result = finalpaths
       # Also copy template images, they are in "tempimg" directory
@@ -309,7 +317,7 @@ def main(argv):
       # Setup output folders and images
       linkres = setupOut(output,tempimg,pathres,input1,number)
       # Print HTML report
-      printHTML(output,linkres,maxscore,maxid)
+      printHTML(output,linkres,maxscore,maxid,number)
 
     elif number == "m":
       print "Generating multiple file report..."
@@ -322,7 +330,7 @@ def main(argv):
       # Assign each component to its top matched term
       finalres = termMatch(linkres)
       # Print HTML report
-      printHTML(output,finalres,maxscore,maxid)
+      printHTML(output,finalres,999,'None',number)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
