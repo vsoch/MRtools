@@ -239,17 +239,18 @@ def setupOut(output,tempimg,result,infile,number):
         os.makedirs(output)
     if not os.path.exists(output + "/img"):
         os.makedirs(output + "/img")
-    if os.path.isfile(infile):
-        shutil.copy(infile,output + "/result.txt")
-    if os.path.isfile(tempimg):
-        shutil.copy(tempimg,output + "/img/template.png")
-    else:
-        print "Cannot find " + tempimg + ". Exiting!"
-        sys.exit()
-
+    
     # Copy each subject image into the image folder, number subjects 1 to N
     count = 0
     if number == "s":
+      if os.path.isfile(infile):
+        shutil.copy(infile,output + "/result.txt")
+      if os.path.isfile(tempimg):
+        shutil.copy(tempimg,output + "/img/template.png")
+      else:
+        print "Cannot find " + tempimg + ". Exiting!"
+        sys.exit()
+
       for res in result:
           for i in [1,3,5]:
               shutil.copy(res[0] + "/report/" + res[i],output + "/img/" + str(count + 1) + res[i]) 
