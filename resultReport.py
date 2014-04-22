@@ -82,7 +82,7 @@ def printHTML(output,result,maxscore,maxid,number):
             print idx
             paths = paths[idx]
             scores = scores[idx]
-            for i in range(0,len(paths))
+            for i in range(0,len(paths)):
               pathy = paths[i]
               score = scores[i]
               page.write("<p><strong>" + score + "</strong></p>\n")
@@ -194,8 +194,8 @@ def fullPaths(result,number):
 	    result[count][i] = "IC_" + znumber + "_thresh.png"
         count = count + 1
 
-    # Return the result with all partial paths
-    return result
+      # Return the result with all partial paths
+      return result
   
     # If we are doing a multiple report
     elif number == "m":
@@ -203,7 +203,7 @@ def fullPaths(result,number):
       # Index is component full path, value is term||topscore
       # We need to return a new dictionary with png paths instead of .nii.gz
       resultpng = dict()
-      for mr,val in result.iteritems()
+      for mr,val in result.iteritems():
         
         # Extract the thresh_zstat number and match to the report png image
         znumexp = re.compile('[0-9]{1,2}')
@@ -221,7 +221,7 @@ def fullPaths(result,number):
       return resultpng  
 
 # Reorganize dictionary of dict[image path] = term||score to --> dict[term] = [image path||score,imagepath||score,...\
-def termMatch(pngs)
+def termMatch(pngs):
    finalres = dict()
    for mrpath,val in pngs.iteritems():
      term,score = val.split('||')
@@ -259,12 +259,12 @@ def setupOut(output,tempimg,result,infile,number):
     # If we have done analysis for multiple, just copy the images
     elif number == "m":
       count = 0
-      result = dict()
+      finalpaths = dict()
       for png, val in result.iteritems():
         shutil.copy(png,output + "/img/" + str(count + 1) + png.split('/')[-1]) 
-	result[count][i] = "img/" + str(count + 1) + res[i]
         finalpaths[output + "/img/" + str(count + 1) + png.split('/')[-1]] = val
         count = count + 1
+      result = finalpaths
       # Also copy template images, they are in "tempimg" directory
       imgfiles = getFiles(tempimg,".png")
       for i in imgfiles:
@@ -304,7 +304,7 @@ def main(argv):
       print "Generating single report..."
       rawres,maxscore,maxid = readInputSingle(input1)
       # Convert image paths to .png paths
-      pathres = fullPaths(rawres)
+      pathres = fullPaths(rawres,number)
       # Setup output folders and images
       linkres = setupOut(output,tempimg,pathres,input1,number)
       # Print HTML report
@@ -315,9 +315,9 @@ def main(argv):
       # This returns a dictionary, index is component, val is term||maxscore
       mrs = readInputMulti(input1)
       # Convert image paths to .png paths
-      pngs = fullPaths(mrs)
+      pngs = fullPaths(mrs,number)
       # Setup output folders and images
-      linkres = setupOut(output,tempimg,pathres,pngs,number)
+      linkres = setupOut(output,tempimg,pngs,input1,number)
       # Assign each component to its top matched term
       finalres = termMatch(linkres)
       # Print HTML report
