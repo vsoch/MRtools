@@ -102,20 +102,26 @@ def readInputMulti(folder):
     for f in infiles:
       try:
           result = []
-          rfile = open(readfile,'r')
+          rfile = open(folder + "/" + f,'r')
+          term = f.split("_")[0]
             for line in rfile:
               line = line.rstrip("\n").rstrip(" ").rstrip()
               sub,match1,val1,match2,val2,match3,val3 = line.split(" ")
             if sub not in ("ID"):
-                result.append([sub.rstrip(),match1.rstrip(),val1.rstrip(),match2.rstrip(),val2.rstrip(),match3.rstrip(),val3.rstrip().rstrip("\n")])
-                if val1 >= maxscore: maxscore = val1; maxid = sub
-                if val2 >= maxscore: maxscore = val2; maxid = sub
-                if val3 >= maxscore: maxscore = val3; maxid = sub
+              # If we've already seen the subject
+              if sub in mrs:
+                topmatch = mrs[sub]
+                tmp,maxscore = topmatch.split('||')
+                if val1 >= maxscore: mrs[sub] = term + "||" + val1
+                if val2 >= maxscore: maxscore = term + "||" + val2
+                if val3 >= maxscore: maxscore = term + "||" + val3
           rfile.close()
       except:
           print "Cannot open file " + f + ". Exiting"
           sys.exit()
       
+      # At this point, we have a dictionary of subjects, each matched to a top term
+      # NEXT PRINT REPORT TAT DISPLAYS COMPONENT AND IMAGES!
       return result,maxscore,maxid
 
     
