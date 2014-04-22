@@ -271,7 +271,7 @@ def setupOut(output,tempimg,result,infile,number):
       finalpaths = dict()
       for png, val in result.iteritems():
         shutil.copy(png,output + "/img/" + str(count + 1) + png.split('/')[-1]) 
-        finalpaths["/img/" + str(count + 1) + png.split('/')[-1]] = val
+        finalpaths["img/" + str(count + 1) + png.split('/')[-1]] = val
         count = count + 1
       result = finalpaths
       # Also copy template images, they are in "tempimg" directory
