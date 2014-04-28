@@ -12,7 +12,7 @@ filey.close()
 subs = "/home/vsochat/SCRIPT/python/MRtools/input.txt"
 images = "/home/vsochat/SCRIPT/python/MRtools/images.txt"
 templatedir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth3000"
-outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output/PerOverlap"
+outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output/PerOverlap"  # We are calculating percent overlap
 
 # Read in templates
 templates = open('templates.txt','r').readlines()

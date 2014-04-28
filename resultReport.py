@@ -31,6 +31,7 @@ import re
 import shutil
 import operator
 import getopt
+import numpy as np
 
 # USAGE ---------------------------------------------------------------------------------
 def usage():
@@ -178,7 +179,7 @@ def makeMatchMatrix(folder,thresh):
 
     # We will need to save a matrix of IC components (rows) and terms (columns)
     # For each image, we save the top match score across all maps
-    matrix = nu.zeros()
+    matrix = np.zeros()
     print "Reading " + str(len(infiles)) + " input files..."
     for f in infiles:
       try:
