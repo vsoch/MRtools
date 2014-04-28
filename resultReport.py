@@ -170,6 +170,44 @@ def readInputMulti(folder):
     # At this point, we have a dictionary of component image paths, each matched to a top term
     return mrs
 
+# CREATE MATRIX OF SUBJECTS / IMAGES / MATCH (for use in R)
+def makeMatchMatrix(folder,thresh):
+
+    # Get report files in folder - each infile is a term
+    infiles = getFiles(folder,"beststats.txt")
+
+    # We will need to save a matrix of IC components (rows) and terms (columns)
+    # For each image, we save the top match score across all maps
+    matrix = nu.zeros()
+    print "Reading " + str(len(infiles)) + " input files..."
+    for f in infiles:
+      try:
+          rfile = open(folder + "/" + f,'r')
+          term = f.split(".")[0]
+          for line in rfile:
+            line = line.rstrip("\n").rstrip(" ").rstrip()
+            sub,match1,val1,match2,val2,match3,val3 = line.split(" ")
+            if sub in mrs:
+                topmatch = mrs[sub]
+                tmp,maxscore = topmatch.split('||')
+                if float(val1) >= float(maxscore): mrs[sub + "/" + match1] = term + "||" + val1
+                if float(val2) >= float(maxscore): mrs[sub + "/" + match2] = term + "||" + val2
+                if float(val3) >= float(maxscore): mrs[sub + "/" + match3] = term + "||" + val3
+              # If we haven't seen this subject
+            else:
+                vals = [float(val1),float(val2),float(val3)]
+                mrtmp = [match1,match2,match3]
+                # Get index of the top value
+                idx = sorted(range(len(vals)), key=lambda i: vals[i])[-1:]
+                # Save to dictionary
+                mrs[sub + "/" + mrtmp[idx[0]]] = term + "||" + str(vals[idx[0]])
+          rfile.close()
+      except:
+          print "Cannot open file " + f + ". Exiting"
+          sys.exit()
+      
+    # At this point, we have a dictionary of component image paths, each matched to a top term
+    return mrs
 
 # Get full paths for components and subject folders
 def fullPaths(result,number):
