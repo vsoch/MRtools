@@ -911,8 +911,8 @@ class Match:
                 perVoxTmp[com.name] = 0
                 print comname + " does not have shared voxels with template."
             else:
-                perVoxMap[com.name] = float(voxel_in_roi/np.count_nonzero(data)) # Overlap voxels as percentage of component map
-                perVoxTmp[com.name] = float(voxel_in_roi/len(coordsRCP))         # Overlap voxels as percentage of template voxels
+                perVoxMap[com.name] = float(voxel_in_roi)/float(np.count_nonzero(data)) # Overlap voxels as percentage of component map
+                perVoxTmp[com.name] = float(voxel_in_roi)/float(len(coordsRCP))         # Overlap voxels as percentage of template voxels
                 print "Overlap voxels in roi are " + str(voxel_in_roi)
                 print "Total voxels in component are " + str(np.count_nonzero(data))
                 print "Total voxels in template are " + str(len(coordsRCP))
