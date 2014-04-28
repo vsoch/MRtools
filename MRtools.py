@@ -812,10 +812,11 @@ class Match:
             print comname + " absolute activation difference score: " + str(activation_differenceabs[com.name]) + "\n"
         return activation_difference,activation_differenceabs
 
-    def matchOverlap(self):
-        '''matchOverlap() performs matching with Match.components, and coordinates Match.coordsMNI, for a specified subject ica directory'''
+    def matchMeanActivationVoxelShared(self):
+        '''performs matching with Match.components, and coordinates Match.coordsMNI, for a specified subject ica directory'''
         '''Two dictionaries are returned containing activation difference scores (and absolute value of the scores) with component names as keys'''
         '''Algorithm chooses "best" as having highest mean activation per voxel shared, not caring about activation in voxels not shared'''
+        '''Score represents the mean activation per voxel'''
         # Set activation_difference dictionaries to keep track of absolute and absolute value scores, indexed by component name
         activation_overlap = {}
         activation_overlapabs = {}
@@ -867,6 +868,55 @@ class Match:
                 print comname + " activation overlap score: " + str(activation_overlap[com.name])
             print comname + " absolute activation overlap score: " + str(activation_overlapabs[com.name]) + "\n"
         return activation_overlap,activation_overlapabs
+
+    def matchOverlap(self):
+        '''matchOverlap() performs matching with Match.components, and coordinates Match.coordsMNI, for a specified subject ica directory'''
+        '''Two dictionaries are returned containing percentage of voxels in map within template (overlap / size of component) with component names as keys'''
+        '''and percentage of voxels of template within map (overlap / size of template)'''
+        '''Score represents the mean activation per voxel'''
+        # Set activation_difference dictionaries to keep track of absolute and absolute value scores, indexed by component name
+        perVoxMap = {}
+        perVoxTmp = {}
+
+        print "\nCalculating shared activation per voxel for each contender image..."
+        # Cycle through components and...
+        for com in self.components:		      
+            # Set activation counter variables to zero
+            voxel_in_roi = 0
+            # Get the data in coordinate space
+            data = com.getData()  
+    
+            # For each, take the coordinate list (in MNI) and convert to the raw coordinate space of the image
+            coordsRCP = []
+            for point in self.coordsMNI:
+                coordsRCP.append(com.mnitoRCP(point))	     
+
+            # SHARED ACTIVATION
+            # For each point, try to look it up.  If we query an index that doesn't exist, this means
+            # we don't have data for that point, and we don't use it in our similarity calculation.
+            for point in coordsRCP:
+                try:
+                # Get the activation value at the point
+                    if data[point[0],point[1],point[2]] != 0:
+                        # If it isn't zero, then add to shared scoring
+                        voxel_in_roi = voxel_in_roi + 1
+                except:
+                    print "Coordinate " + str(point) + " is not in " + com.name
+                    print "...will not be included in similarity calculation!"
+                                 
+            # Each subject will have an activation overlap score for each component to the template.
+            comname = os.path.basename(com.name.split('.')[0]) 
+            if (voxel_in_roi == 0):
+                perVoxMap[com.name] = 0
+                perVoxTmp[com.name] = 0
+                print comname + " does not have shared voxels with template."
+            else:
+                perVoxMap[com.name] = (voxel_in_roi/np.count_nonzero(data)) # Overlap voxels as percentage of component map
+                perVoxTmp[com.name] = (voxel_in_roi/len(coordsRCP))         # Overlap voxels as percentage of template voxels
+                print comname + " overlap voxels as percentage of component map is " + str(perVoxMap[com.name])
+                print comname + " overlap voxels as percentage of template image is " + str(perVoxTmp[com.name] + "\n")
+        return perVoxMap,perVoxTmp
+
 
 # ROI------------------------------------------------------------------------------
 class ROI:
