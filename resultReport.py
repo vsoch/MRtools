@@ -12,7 +12,8 @@ INPUT:
 -r --report=    Single text report file (--number=s) OR folder with multiple reports (--number=m)
 -t --template=  Path to image to display for template (single), OR path to folder with images (multiple)
 -o --oname=     Name for output folder in PWD
--n --number     s for single report, m for multiple reports in one folder
+-n --number=    s for single report, m for multiple reports in one folder
+-e --thresh=    (optional) a threshold for match scores
 
 USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png --oname=thresh1
 
@@ -38,7 +39,7 @@ def usage():
     print __doc__
 
 # Print HTML report!
-def printHTML(output,result,maxscore,maxid,number):
+def printHTML(output,result,maxscore,maxid,number,thresh=0):
     if not os.path.isfile(output + "/report.html"):
         print "Creating results HTML report in " + output + "..."
         report = open(output + "/report.html",'w')
@@ -61,6 +62,7 @@ def printHTML(output,result,maxscore,maxid,number):
 
         # For multiple report, organize by term and top matches
         # dict[term] = [image path||score,imagepath||score,...\
+        # If the user doesn't define a threshold, print all, otherwise threshold
         elif number == "m":
           # The main report page will have links to each of the terms
           for term,matches in result.iteritems():
@@ -69,20 +71,24 @@ def printHTML(output,result,maxscore,maxid,number):
             page =  open(output + "/" + term + ".html",'w')
             # First print the template image
             page.write("<html>\n<body>\n<h1>" + term.upper() + " Matched Images</h1>\n")
+            page.write('<strong>Threshold: Score > ' + str(thresh) + "</strong><br>\n")
             # Print the template image
             page.write("<img src=\"img/" + term + ".png\" /><br>\"\n")
             # Now for each result, print images - order by match score
             paths = []; scores = []
+            # If we only have one match
             if not isinstance(matches,list):
               pathy,score = matches.split("||")
-              page.write("<p><strong>" + str(score) + "</strong></p>\n")
-              page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
-              page.write("<br /><br />\n")
+              if float(score) > float(thresh):
+                page.write("<p><strong>" + str(score) + "</strong></p>\n")
+                page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
+                page.write("<br /><br />\n")
             else:
               for res in matches:
                 pathy,score = res.split('||')
-                paths.append(pathy)
-                scores.append(float(score))
+                if float(score) > float(thresh):
+                  paths.append(pathy)
+                  scores.append(float(score))
               # Order by match score
               idx = [i[0] for i in sorted(enumerate(scores), key=lambda x:x[1])]
               paths = [paths[i] for i in idx]
@@ -157,45 +163,6 @@ def readInputMulti(folder):
                 if float(val3) >= float(maxscore): mrs[sub + "/" + match3] = term + "||" + val3
               # If we haven't seen this subject
               else:
-                vals = [float(val1),float(val2),float(val3)]
-                mrtmp = [match1,match2,match3]
-                # Get index of the top value
-                idx = sorted(range(len(vals)), key=lambda i: vals[i])[-1:]
-                # Save to dictionary
-                mrs[sub + "/" + mrtmp[idx[0]]] = term + "||" + str(vals[idx[0]])
-          rfile.close()
-      except:
-          print "Cannot open file " + f + ". Exiting"
-          sys.exit()
-      
-    # At this point, we have a dictionary of component image paths, each matched to a top term
-    return mrs
-
-# CREATE MATRIX OF SUBJECTS / IMAGES / MATCH (for use in R)
-def makeMatchMatrix(folder,thresh):
-
-    # Get report files in folder - each infile is a term
-    infiles = getFiles(folder,"beststats.txt")
-
-    # We will need to save a matrix of IC components (rows) and terms (columns)
-    # For each image, we save the top match score across all maps
-    matrix = np.zeros()
-    print "Reading " + str(len(infiles)) + " input files..."
-    for f in infiles:
-      try:
-          rfile = open(folder + "/" + f,'r')
-          term = f.split(".")[0]
-          for line in rfile:
-            line = line.rstrip("\n").rstrip(" ").rstrip()
-            sub,match1,val1,match2,val2,match3,val3 = line.split(" ")
-            if sub in mrs:
-                topmatch = mrs[sub]
-                tmp,maxscore = topmatch.split('||')
-                if float(val1) >= float(maxscore): mrs[sub + "/" + match1] = term + "||" + val1
-                if float(val2) >= float(maxscore): mrs[sub + "/" + match2] = term + "||" + val2
-                if float(val3) >= float(maxscore): mrs[sub + "/" + match3] = term + "||" + val3
-              # If we haven't seen this subject
-            else:
                 vals = [float(val1),float(val2),float(val3)]
                 mrtmp = [match1,match2,match3]
                 # Get index of the top value
@@ -322,7 +289,7 @@ def setupOut(output,tempimg,result,infile,number):
 # MAIN ----------------------------------------------------------------------------------
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hr:o:t:n:", ["help","report=","oname=","template=","number="])
+        opts, args = getopt.getopt(argv, "hr:o:t:n:e", ["help","report=","oname=","template=","number=","thresh="])
 
     except getopt.GetoptError:
         usage()
@@ -341,6 +308,9 @@ def main(argv):
             tempimg = arg
         if opt in ("-n","--number"):
             number = arg
+        if opt in ("-e","--thresh"):
+            number = arg
+
 
     if number.lower() not in ("s","m"):
       usage()
@@ -369,7 +339,7 @@ def main(argv):
       # Assign each component to its top matched term
       finalres = termMatch(linkres)
       # Print HTML report
-      printHTML(output,finalres,999,'None',number)
+      printHTML(output,finalres,999,'None',number,thresh)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
