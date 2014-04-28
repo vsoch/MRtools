@@ -12,7 +12,7 @@ filey.close()
 subs = "/home/vsochat/SCRIPT/python/MRtools/input.txt"
 images = "/home/vsochat/SCRIPT/python/MRtools/images.txt"
 templatedir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth3000"
-outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output"
+outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output/PerOverlap"
 
 # Read in templates
 templates = open('templates.txt','r').readlines()

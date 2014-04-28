@@ -914,7 +914,7 @@ class Match:
                 perVoxMap[com.name] = (voxel_in_roi/np.count_nonzero(data)) # Overlap voxels as percentage of component map
                 perVoxTmp[com.name] = (voxel_in_roi/len(coordsRCP))         # Overlap voxels as percentage of template voxels
                 print comname + " overlap voxels as percentage of component map is " + str(perVoxMap[com.name])
-                print comname + " overlap voxels as percentage of template image is " + str(perVoxTmp[com.name] + "\n")
+                print comname + " overlap voxels as percentage of template image is " + str(perVoxTmp[com.name]) + "\n"
         return perVoxMap,perVoxTmp
 
 
