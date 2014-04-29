@@ -77,11 +77,8 @@ def printHTML(output,result,maxscore,maxid,number,thresh=0):
             # Now for each result, print images - order by match score
             paths = []; scores = []
             # If we only have one match
-            print matches
             if not isinstance(matches,list):
               pathy,score = matches.split("||")
-              print "SCORE: " + str(score)
-              print "THRESH: " + str(thresh)
               if float(score) > float(thresh):
                 print "Adding score " + str(thresh) + " to " + term
                 page.write("<p><strong>" + str(score) + "</strong></p>\n")
@@ -343,7 +340,7 @@ def main(argv):
       # Assign each component to its top matched term
       finalres = termMatch(linkres)
       # Print HTML report
-      printHTML(output,finalres,999,'None',number,0)
+      printHTML(output,finalres,999,'None',number,.6)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
