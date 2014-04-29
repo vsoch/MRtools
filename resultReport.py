@@ -29,7 +29,7 @@ def usage():
     print __doc__
 
 # Print HTML report!
-def printHTML(output,result,maxscore,maxid,number,thresh=0):
+def printHTML(output,result,maxscore,maxid,number,thresh):
     if not os.path.isfile(output + "/report.html"):
         print "Creating results HTML report in " + output + "..."
         report = open(output + "/report.html",'w')
@@ -70,7 +70,7 @@ def printHTML(output,result,maxscore,maxid,number,thresh=0):
             if not isinstance(matches,list):
               pathy,score = matches.split("||")
               # Only print if > the threshold
-              if float(score) > float(thresh):
+              if float(score) >= float(thresh):
                 print "Adding score " + str(thresh) + " to " + term
                 page.write("<p><strong>" + str(score) + "</strong></p>\n")
                 page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
@@ -78,7 +78,7 @@ def printHTML(output,result,maxscore,maxid,number,thresh=0):
             else:
               for res in matches:
                 pathy,score = res.split('||')
-                if float(score) > float(thresh):
+                if float(score) >= float(thresh):
                   paths.append(pathy)
                   scores.append(float(score))
               # Order by match score
