@@ -13,7 +13,7 @@ INPUT:
 -t --template=  Path to image to display for template (single), OR path to folder with images (multiple)
 -o --oname=     Name for output folder in PWD
 -n --number=    s for single report, m for multiple reports in one folder
--e --thresh=    (optional) a threshold for match scores
+-e --print matchesthresh=    (optional) a threshold for match scores
 
 USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png --oname=thresh1
 
@@ -77,9 +77,13 @@ def printHTML(output,result,maxscore,maxid,number,thresh=0):
             # Now for each result, print images - order by match score
             paths = []; scores = []
             # If we only have one match
+            print matches
             if not isinstance(matches,list):
               pathy,score = matches.split("||")
+              print "SCORE: " + str(score)
+              print "THRESH: " + str(thresh)
               if float(score) > float(thresh):
+                print "Adding score " + str(thresh) + " to " + term
                 page.write("<p><strong>" + str(score) + "</strong></p>\n")
                 page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
                 page.write("<br /><br />\n")
@@ -289,7 +293,7 @@ def setupOut(output,tempimg,result,infile,number):
 # MAIN ----------------------------------------------------------------------------------
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hr:o:t:n:e", ["help","report=","oname=","template=","number=","thresh="])
+        opts, args = getopt.getopt(argv, "hr:o:t:n:", ["help","report=","oname=","template=","number="])
 
     except getopt.GetoptError:
         usage()
@@ -339,7 +343,7 @@ def main(argv):
       # Assign each component to its top matched term
       finalres = termMatch(linkres)
       # Print HTML report
-      printHTML(output,finalres,999,'None',number,thresh)
+      printHTML(output,finalres,999,'None',number,0)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
