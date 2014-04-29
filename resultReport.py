@@ -2,22 +2,12 @@
 
 """
 
-resultReport.py --> Print MRTools Match Report in Python
+resultReport.py --> Print MRTools Match Report in Python (module)
 
 This python script takes a report produced by pyMatch.py and prints an HTML
 report for visually seeing the matched images.
 
-INPUT:
--h, --help      Print this usage
--r --report=    Single text report file (--number=s) OR folder with multiple reports (--number=m)
--t --template=  Path to image to display for template (single), OR path to folder with images (multiple)
--o --oname=     Name for output folder in PWD
--n --number=    s for single report, m for multiple reports in one folder
--e --print matchesthresh=    (optional) a threshold for match scores
-
-USAGE: python resultReport.py --report=thresh_zstat1.nii_beststats.txt --template=/path/to/image.png --oname=thresh1
-
-OUTPUT: report.html and images in oname directory in pwd
+USAGE:
 
 """
 
@@ -74,11 +64,12 @@ def printHTML(output,result,maxscore,maxid,number,thresh=0):
             page.write('<strong>Threshold: Score > ' + str(thresh) + "</strong><br>\n")
             # Print the template image
             page.write("<img src=\"img/" + term + ".png\" /><br>\"\n")
-            # Now for each result, print images - order by match score
+            # For each result, print images - order by match score
             paths = []; scores = []
             # If we only have one match
             if not isinstance(matches,list):
               pathy,score = matches.split("||")
+              # Only print if > the threshold
               if float(score) > float(thresh):
                 print "Adding score " + str(thresh) + " to " + term
                 page.write("<p><strong>" + str(score) + "</strong></p>\n")
@@ -138,7 +129,7 @@ def getFiles(folder,pattern):
   return infiles
 
 # PRINT OUTPUT FOR MULTIPLE FILES IN ONE FOLDER
-def readInputMulti(folder):
+def readInputMulti(folder,thresh):
 
     # Get report files in folder
     infiles = getFiles(folder,"beststats.txt")
@@ -168,8 +159,9 @@ def readInputMulti(folder):
                 mrtmp = [match1,match2,match3]
                 # Get index of the top value
                 idx = sorted(range(len(vals)), key=lambda i: vals[i])[-1:]
-                # Save to dictionary
-                mrs[sub + "/" + mrtmp[idx[0]]] = term + "||" + str(vals[idx[0]])
+                # If it's greater than threshold, save to dictionary
+                if vals[idx[0]] >= thresh:
+                  mrs[sub + "/" + mrtmp[idx[0]]] = term + "||" + str(vals[idx[0]])
           rfile.close()
       except:
           print "Cannot open file " + f + ". Exiting"
@@ -289,58 +281,6 @@ def setupOut(output,tempimg,result,infile,number):
 
 # MAIN ----------------------------------------------------------------------------------
 def main(argv):
-    try:
-        opts, args = getopt.getopt(argv, "hr:o:t:n:", ["help","report=","oname=","template=","number="])
-
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-    
-    # First cycle through the arguments to collect user variables
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit()    
-        if opt in ("-r","--report"):
-            input1 = arg
-        if opt in ("-o","--oname"):
-            output = arg
-        if opt in ("-t","--template"):
-            tempimg = arg
-        if opt in ("-n","--number"):
-            number = arg
-        if opt in ("-e","--thresh"):
-            number = arg
-
-
-    if number.lower() not in ("s","m"):
-      usage()
-      print "ERROR: Please specify s (single) or m (multiple) for report type"
-      sys.exit(32)
-
-    if number == "s":
-      # Read in text file input
-      print "Generating single report..."
-      rawres,maxscore,maxid = readInputSingle(input1)
-      # Convert image paths to .png paths
-      pathres = fullPaths(rawres,number)
-      # Setup output folders and images
-      linkres = setupOut(output,tempimg,pathres,input1,number)
-      # Print HTML report
-      printHTML(output,linkres,maxscore,maxid,number)
-
-    elif number == "m":
-      print "Generating multiple file report..."
-      # This returns a dictionary, index is component, val is term||maxscore
-      mrs = readInputMulti(input1)
-      # Convert image paths to .png paths
-      pngs = fullPaths(mrs,number)
-      # Setup output folders and images
-      linkres = setupOut(output,tempimg,pngs,input1,number)
-      # Assign each component to its top matched term
-      finalres = termMatch(linkres)
-      # Print HTML report
-      printHTML(output,finalres,999,'None',number,.6)
-
+    usage()
 if __name__ == "__main__":
     main(sys.argv[1:])
