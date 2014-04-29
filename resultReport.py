@@ -54,10 +54,8 @@ def printHTML(output,result,maxscore,maxid,number,thresh):
         # dict[term] = [image path||score,imagepath||score,...\
         # If the user doesn't define a threshold, print all, otherwise threshold
         if number == "m":
-          print "TERM IS M"
           # The main report page will have links to each of the terms
           for term,matches in result.iteritems():
-            print "WE HAVE RESULTS"
             report.write("<h2><a href=" + term +".html>" + term + "</a></h2>")
             # Write the report page
             page =  open(output + "/" + term + ".html",'w')
@@ -70,7 +68,6 @@ def printHTML(output,result,maxscore,maxid,number,thresh):
             paths = []; scores = []
             # If we only have one match
             if not isinstance(matches,list):
-              print "WE HAVE SINGLE MATCH"
               pathy,score = matches.split("||")
               # Only print if > the threshold
               if float(score) >= float(thresh):
@@ -79,7 +76,6 @@ def printHTML(output,result,maxscore,maxid,number,thresh):
                 page.write("<img src=\"" + pathy + "\" width=\"30%\" />\"")
                 page.write("<br /><br />\n")
             else:
-              print "WE HAVE MULTIPLE MATCH"
               for res in matches:
                 pathy,score = res.split('||')
                 if float(score) >= float(thresh):
@@ -90,7 +86,6 @@ def printHTML(output,result,maxscore,maxid,number,thresh):
               paths = [paths[i] for i in idx]
               scores = [scores[i] for i in idx]
               for i in range(0,len(paths)):
-                print "PRINTING PATHS TO PAGE"
                 pathy = paths[i]
                 score = scores[i]
                 page.write("<p><strong>" + str(score) + "</strong></p>\n")
