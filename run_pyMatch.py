@@ -11,11 +11,12 @@ filey.close()
 #-s --subs=      Single column text file w/ list of subject (or group) folders containing components
 subs = "/home/vsochat/SCRIPT/python/MRtools/input.txt"
 images = "/home/vsochat/SCRIPT/python/MRtools/images.txt"
-templatedir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth3000"
-outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output/PerOverlap"  # We are calculating percent overlap
+templatedir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth525"
+outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output/PerOverlap525"  # We are calculating percent overlap
 
 # Read in templates
-templates = open('templates.txt','r').readlines()
+# Generated with ls /scratch/users/vsochat/DATA/BRAINMAP/nsynth525 -1 >> templates525.txt
+templates = open('templates525.txt','r').readlines()
 
 # Cycle through templates, calculate match scores for all subjects, for each
 for temp in templates:

@@ -6,9 +6,9 @@ import MRtools
 import os.path
 
 # This script will use MRtools to create png images of brain maps
-indir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth3000"
+indir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth525"
 images = [ f for f in listdir(indir) if isfile(join(indir,f)) ]
-outdir = "/scratch/users/vsochat/DATA/BRAINMAP/img"
+outdir = "/scratch/users/vsochat/DATA/BRAINMAP/img/525"
 
 for i in images:
    filey = outdir + "/" + i.replace(".nii.gz",".png")
