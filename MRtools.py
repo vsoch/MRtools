@@ -869,6 +869,53 @@ class Match:
             print comname + " absolute activation overlap score: " + str(activation_overlapabs[com.name]) + "\n"
         return activation_overlap,activation_overlapabs
 
+    def matchOverlapMatrix(self):
+        '''matchOverlapMatrix() performs matching with Match.components, and coordinates Match.coordsMNI, for a specified subject ica directory'''
+        '''A vector is returned with values of match scores for all components to the template with percentage of voxels in map within template (overlap / size of''' 
+        '''component) with component names as keys'''
+        # Dictionary to keep track of scores, indexed by component name
+        overlapScores = {}
+
+        print "\nCalculating overlap scores for each contender image..."
+        # Cycle through components and...
+        for com in self.components:		      
+            # Set activation counter variables to zero
+            voxel_in_roi = 0
+            # Get the data in coordinate space
+            data = com.getData()  
+    
+            # For each, take the coordinate list (in MNI) and convert to the raw coordinate space of the image
+            coordsRCP = []
+            for point in self.coordsMNI:
+                coordsRCP.append(com.mnitoRCP(point))	     
+
+            # SHARED ACTIVATION
+            # For each point, try to look it up.  If we query an index that doesn't exist, this means
+            # we don't have data for that point, and we don't use it in our similarity calculation.
+            for point in coordsRCP:
+                try:
+                # Get the activation value at the point
+                    if data[point[0],point[1],point[2]] != 0:
+                        # If it isn't zero, then add to shared scoring
+                        voxel_in_roi = voxel_in_roi + 1
+                except:
+                    print "Coordinate " + str(point) + " is not in " + com.name
+                    print "...will not be included in similarity calculation!"
+                                 
+            # Each subject will have an activation overlap score for each component to the template.
+            comname = os.path.basename(com.name.split('.')[0]) 
+            if (voxel_in_roi == 0):
+                overlapScores[com.name] = 0
+                print comname + " does not have shared voxels with template."
+            else:
+                overlapScores[com.name] = float(voxel_in_roi)/float(np.count_nonzero(data)) # Overlap voxels as percentage of component map
+                print "Overlap voxels in roi are " + str(voxel_in_roi)
+                print "Total voxels in component are " + str(np.count_nonzero(data))
+                print "Total voxels in template are " + str(len(coordsRCP))
+                print comname + " overlap voxels as percentage of component map is " + str(perVoxMap[com.name])
+        return overlapScores
+
+
     def matchOverlap(self):
         '''matchOverlap() performs matching with Match.components, and coordinates Match.coordsMNI, for a specified subject ica directory'''
         '''Two dictionaries are returned containing percentage of voxels in map within template (overlap / size of component) with component names as keys'''

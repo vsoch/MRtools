@@ -45,7 +45,7 @@ import MRtools # includes classes Data, Filter, and Match
 import operator
 import getopt
 import re
-
+import numpy as np
 
 # RESULT------------------------------------------------------------------------------
 class pyMatchRes:
@@ -91,7 +91,7 @@ class pyMatchRes:
             print "Cannot write file " + self.fullpath + ". Exiting"
             sys.exit()
 
-    # Prints a single column test file, template image at top, in format /full/image/path:match_score
+    # Prints a single column text file, template image at top, in format /full/image/path:match_score
     def addImages(self,imagelist):
         iopen = open(self.imagepath,'a')
         for imgname in imagelist:
@@ -183,8 +183,8 @@ def main(argv):
     Match = MRtools.Match(Template)        # Create an MRTools Match object to do the job!
     Match.setIndexCrit('>',0)              # Set criteria for filtering the template image
     Match.genIndexMNI()                    # Generate the indices based on specified filter in MNI space
-	                                   # Match.indexes[n][0] is x coordinate in mm 
-					   # Match.indexes[n][1] is y coordinate in mm
+                                           # Match.indexes[n][0] is x coordinate in mm 
+                                           # Match.indexes[n][1] is y coordinate in mm
                                            # Match.indexes[n][2] is z coordinate in mm
 
     # COMPONENT IMAGE WORK --------------------------------------------------------------------------   
@@ -194,9 +194,18 @@ def main(argv):
     # Note that "subject" might also be a group .gica folder, or a dual regression results folder, however the idea is the same  
     # This script assumes that input image lists have already been filtered, etc.
 
+    # We are going to put results into a matrix - terms will be in columns, images in rows, values are overlap match scores
+    # So this script will output a single column for the term
+    matrix = list()
+    rowLabels = []
+
     print "Computing similarity scores..."    
     for subject,images in found.iteritems():
       print "Processing images for subject " + subject + "..."
+      
+      # Add image names to our rowlabels
+      rowLabels.append(images)
+      
       for img_current in images:
         if img_current:
           print img_current
@@ -204,8 +213,6 @@ def main(argv):
           # and the images to match are those whose IC components have passed filtering
           # the DR images and IC networks that pass filter results are in the original
           # gica directory under "filter"
-                
-                    
           try:
               # Use MRtools Data class to read in image
               Contender = MRtools.Data(img_current,'3D')
@@ -216,36 +223,44 @@ def main(argv):
               sys.exit()    
                     
       if len(Match.components) > 0:
-        # DO TEMPLATE MATCHING
+
+        # DO TEMPLATE MATCHING - commented out code is for old method to get top three scores / subject
         # Get dictionaries of activation overlap scores, and activation overlap absolute value scores
         # There is one for each subject, indexed by the component image name
-        activation_overlap,activation_overlapabs = Match.matchOverlap()
+        # activation_overlap,activation_overlapabs = Match.matchOverlap()
 
         # CHOOSE TOP RESULTS ----------------------------------------------------------------------------------	
         # When we finish cycling through the components, we want to find the top three matching (the most similar) components
         # We rank with activation_overlapabs, which is looking at absolute activation values (negative and positive Z ranked equally)
 			
-        topmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-1])
-        secondmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-2])
-        thirdmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-3])
+        # topmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-1])
+        # secondmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-2])
+        # thirdmatch = list(sorted(activation_overlapabs.iteritems(), key=operator.itemgetter(1))[-3])
 
         # Print information about the top three to the final results log
-        # VANESSA - IT MIGHT MAKE SENSE TO PRINT ALL RESULTS, AND THEN USE NUMERICAL FILTER WHEN WE SELECT TO GENERATE AIM TEMPLATES FOR...
-        resultitem = [subject,os.path.basename(topmatch[0]),topmatch[1],os.path.basename(secondmatch[0]),secondmatch[1],os.path.basename(thirdmatch[0]),thirdmatch[1]]
-        Result.addResult(resultitem)
+        # resultitem = [subject,os.path.basename(topmatch[0]),topmatch[1],os.path.basename(secondmatch[0]),secondmatch[1],os.path.basename(thirdmatch[0]),thirdmatch[1]]
+        # Result.addResult(resultitem)
 
         # Add full paths to images to bestcomps.txt file, to create AIM templates for
-        Result.addImages([str(topmatch[0]) + ":" + str(topmatch[1]),str(secondmatch[0]) + ":" + str(secondmatch[1]),str(thirdmatch[0]) + ":" + str(thirdmatch[1])])
+        # Result.addImages([str(topmatch[0]) + ":" + str(topmatch[1]),str(secondmatch[0]) + ":" + str(secondmatch[1]),str(thirdmatch[0]) + ":" + str(thirdmatch[1])])
 
-        print "Top matches for " + Template.name + " are:"
-        print "    1) " + str(os.path.basename(topmatch[0]))
-        print "    2) " + str(os.path.basename(secondmatch[0]))
-        print "    3) " + str(os.path.basename(thirdmatch[0])) + "\n"
+        # print "Top matches for " + Template.name + " are:"
+        # print "    1) " + str(os.path.basename(topmatch[0]))
+        # print "    2) " + str(os.path.basename(secondmatch[0]))
+        # print "    3) " + str(os.path.basename(thirdmatch[0])) + "\n"
 
-        print "Full results printed to: " + Result.getFullPath()
-        print "Image list printed to: " + Result.getImPath()
+        # print "Full results printed to: " + Result.getFullPath()
+        # print "Image list printed to: " + Result.getImPath()
 
         # Clear the Match object to prepare for the next subject or group, if applicable
+
+
+        # DO TEMPLATE MATCHING - This code is for generating list of dictionaries, 
+        resultitem = Match.matchOverlap() # outputs a dictionary of match scores, each to template
+
+        # For each match score, add to output file
+        for i,score in resultitem.iteritems():
+          Result.addResult(i + "\t" + str(score))
         Match.reset()
       
       else:
