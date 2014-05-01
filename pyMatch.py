@@ -174,7 +174,7 @@ def main(argv):
     if not output:
         output = os.getcwd()
     Result = pyMatchRes(output,Template.name)        
-    Result.writeHeader([input1 + ":template"])
+    Result.writeHeader(input1 + ":template")
 
     # TEMPLATE WORK ------------------------------------------------------------------------
     # Identify voxels that meet criteria.  
