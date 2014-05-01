@@ -54,9 +54,7 @@ class pyMatchRes:
         self.file = filename      # filename
         self.name = None
         self.fullpath = None      # Full path to output stats file
-        self.imagepath = None     # Full path to output image file
 	self.setPath()
-	self.writeHeader()
 
     def getFullPath(self):
         return self.fullpath
@@ -67,14 +65,13 @@ class pyMatchRes:
     def setPath(self):
         base,ext = os.path.splitext(os.path.basename(self.file))
 	self.fullpath = self.output + "/" + base + "_beststats.txt"
-        self.imagepath = self.output + "/" + base + "_bestcomps.txt"
         self.name = base
 
     # writeHeader and addResult print a beststats.txt file for import into excel, etc.
-    def writeHeader(self):
+    def writeHeader(self,header):
         try:
 	    fopen = open(self.fullpath,'w')
-	    fopen.write("ID Match1 Score1 Match2 Score2 Match3 Score3\n")
+	    fopen.write(header + "\n")
             fopen.close()
 	except:
             print "Cannot write file " + self.fullpath + ". Exiting"
@@ -177,7 +174,7 @@ def main(argv):
     if not output:
         output = os.getcwd()
     Result = pyMatchRes(output,Template.name)        
-    Result.addImages([input1 + ":template"])
+    Result.writeHeader([input1 + ":template"])
 
     # TEMPLATE WORK ------------------------------------------------------------------------
     # Identify voxels that meet criteria.  
