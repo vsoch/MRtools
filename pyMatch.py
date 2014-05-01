@@ -83,8 +83,9 @@ class pyMatchRes:
     def addResult(self,result):
 	try:
 	    fopen = open(self.fullpath,'a')
-	    for entry in result:
-		fopen.write(str(entry) + " ",)
+	    fopen.write(result)
+            #for entry in result:
+	    #    fopen.write(str(entry) + " ",)
 	    fopen.write("\n")
             fopen.close()
 	except:
@@ -256,10 +257,11 @@ def main(argv):
 
 
         # DO TEMPLATE MATCHING - This code is for generating list of dictionaries, 
-        resultitem = Match.matchOverlap() # outputs a dictionary of match scores, each to template
+        resultitem = Match.matchOverlapMatrix() # outputs a dictionary of match scores, each to template
 
         # For each match score, add to output file
         for i,score in resultitem.iteritems():
+          print "Adding " + i + " " + str(score)
           Result.addResult(i + "\t" + str(score))
         Match.reset()
       

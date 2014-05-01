@@ -912,7 +912,7 @@ class Match:
                 print "Overlap voxels in roi are " + str(voxel_in_roi)
                 print "Total voxels in component are " + str(np.count_nonzero(data))
                 print "Total voxels in template are " + str(len(coordsRCP))
-                print comname + " overlap voxels as percentage of component map is " + str(perVoxMap[com.name])
+                print comname + " overlap voxels as percentage of component map is " + str(overlapScores[com.name])
         return overlapScores
 
 
