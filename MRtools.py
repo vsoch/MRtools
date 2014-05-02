@@ -883,26 +883,17 @@ class Match:
             voxel_in_roi = 0
             # Get the data in coordinate space
             data = com.getData()  
-    
-            # For each, take the coordinate list (in MNI) and convert to the raw coordinate space of the image
-            coordsRCP = []
-            for point in self.coordsMNI:
-                coordsRCP.append(com.mnitoRCP(point))	     
+            
+            # Make sure we are in same space
+            if [self.Data.xdim,self.Data.ydim,self.Data.zdim] != [com.xdim,com.ydim,com.zdim]
+                print "ERROR: Template and components have different sizes!\n"
+                print "Register to same place and re-run.  Exiting."
+                sys.exit(32)
 
-            # SHARED ACTIVATION
-            # For each point, try to look it up.  If we query an index that doesn't exist, this means
-            # we don't have data for that point, and we don't use it in our similarity calculation.
-            for point in coordsRCP:
-                try:
-                # Get the activation value at the point
-                    if data[point[0],point[1],point[2]] != 0:
-                        # If it isn't zero, then add to shared scoring
-                        voxel_in_roi = voxel_in_roi + 1
-                except:
-                    print "Coordinate " + str(point) + " is not in " + com.name
-                    print "...will not be included in similarity calculation!"
-                                 
-            # Each subject will have an activation overlap score for each component to the template.
+            compROI = data
+            compROI[nu.isnan(compROI)] = 0
+            compROI[compROI != 0] = 1
+            voxel_in_roi = np.sum(var1 * var2)
             comname = os.path.basename(com.name.split('.')[0]) 
             if (voxel_in_roi == 0):
                 overlapScores[com.name] = 0
