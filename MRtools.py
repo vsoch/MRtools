@@ -876,6 +876,11 @@ class Match:
         # Dictionary to keep track of scores, indexed by component name
         overlapScores = {}
 
+        # First make an ROI for the Template
+        tempROI = self.Data.getData()
+        tempROI[np.isnan(tempROI)] = 0
+        tempROI[tempROI != 0] = 1
+ 
         print "\nCalculating overlap scores for each contender image..."
         # Cycle through components and...
         for com in self.components:		      
@@ -885,24 +890,25 @@ class Match:
             data = com.getData()  
             
             # Make sure we are in same space
-            if [self.Data.xdim,self.Data.ydim,self.Data.zdim] != [com.xdim,com.ydim,com.zdim]
+            if [self.Data.xdim,self.Data.ydim,self.Data.zdim] != [com.xdim,com.ydim,com.zdim]:
                 print "ERROR: Template and components have different sizes!\n"
                 print "Register to same place and re-run.  Exiting."
                 sys.exit(32)
 
+            # Here is the ROI for the component
             compROI = data
-            compROI[nu.isnan(compROI)] = 0
+            compROI[np.isnan(compROI)] = 0
             compROI[compROI != 0] = 1
-            voxel_in_roi = np.sum(var1 * var2)
+            voxel_in_roi = np.sum(compROI * tempROI)
             comname = os.path.basename(com.name.split('.')[0]) 
             if (voxel_in_roi == 0):
                 overlapScores[com.name] = 0
                 print comname + " does not have shared voxels with template."
             else:
-                overlapScores[com.name] = float(voxel_in_roi)/float(np.count_nonzero(data)) # Overlap voxels as percentage of component map
+                overlapScores[com.name] = float(voxel_in_roi)/float(np.count_nonzero(compROI)) # Overlap voxels as percentage of component map
                 print "Overlap voxels in roi are " + str(voxel_in_roi)
-                print "Total voxels in component are " + str(np.count_nonzero(data))
-                print "Total voxels in template are " + str(len(coordsRCP))
+                print "Total voxels in component are " + str(np.count_nonzero(compROI))
+                print "Total voxels in template are " + str(np.count_nonzero(tempROI))
                 print comname + " overlap voxels as percentage of component map is " + str(overlapScores[com.name])
         return overlapScores
 
