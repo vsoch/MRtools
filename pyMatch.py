@@ -54,7 +54,7 @@ class pyMatchRes:
         self.file = filename      # filename
         self.name = None
         self.fullpath = None      # Full path to output stats file
-	self.setPath()
+        self.setPath()
 
     def getFullPath(self):
         return self.fullpath
@@ -64,28 +64,28 @@ class pyMatchRes:
 
     def setPath(self):
         base,ext = os.path.splitext(os.path.basename(self.file))
-	self.fullpath = self.output + "/" + base + "_beststats.txt"
+        self.fullpath = self.output + "/" + base + "_beststats.txt"
         self.name = base
 
     # writeHeader and addResult print a beststats.txt file for import into excel, etc.
     def writeHeader(self,header):
         try:
-	    fopen = open(self.fullpath,'w')
-	    fopen.write(header + "\n")
+            fopen = open(self.fullpath,'w')
+            fopen.write(header + "\n")
             fopen.close()
-	except:
+        except:
             print "Cannot write file " + self.fullpath + ". Exiting"
             sys.exit()
         
     def addResult(self,result):
-	try:
-	    fopen = open(self.fullpath,'a')
-	    fopen.write(result)
+        try:
+            fopen = open(self.fullpath,'a')
+            fopen.write(result)
             #for entry in result:
-	    #    fopen.write(str(entry) + " ",)
-	    fopen.write("\n")
+            #    fopen.write(str(entry) + " ",)
+            fopen.write("\n")
             fopen.close()
-	except:
+        except:
             print "Cannot write file " + self.fullpath + ". Exiting"
             sys.exit()
 
@@ -95,7 +95,6 @@ class pyMatchRes:
         for imgname in imagelist:
             iopen.write(str(imgname) + "\n")
         iopen.close()
-	
 
 # USAGE ---------------------------------------------------------------------------------
 def usage():
