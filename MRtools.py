@@ -33,6 +33,7 @@ import numpy as np
 import operator
 import getopt
 import copy
+import gc
 
 # Data------------------------------------------------------------------------------
 class Data:
@@ -892,7 +893,7 @@ class Match:
             # Make sure we are in same space
             if [self.Data.xdim,self.Data.ydim,self.Data.zdim] != [com.xdim,com.ydim,com.zdim]:
                 print "ERROR: Template and components have different sizes!\n"
-                print "Register to same place and re-run.  Exiting."
+                print "Register to same space and re-run.  Exiting."
                 sys.exit(32)
 
             # Here is the ROI for the component
@@ -910,6 +911,10 @@ class Match:
                 print "Total voxels in component are " + str(np.count_nonzero(compROI))
                 print "Total voxels in template are " + str(np.count_nonzero(tempROI))
                 print comname + " overlap voxels as percentage of component map is " + str(overlapScores[com.name])
+            # Free memory
+            del data
+            del compROI
+            gc.collect()
         return overlapScores
 
 

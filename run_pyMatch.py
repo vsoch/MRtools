@@ -30,7 +30,7 @@ for temp in templates:
     filey.writelines("#SBATCH --job-name=" + tmp + "\n")  
     filey.writelines("#SBATCH --output=.out/" + tmp + ".out\n")  
     filey.writelines("#SBATCH --error=.out/" + tmp + ".err\n")  
-    filey.writelines("#SBATCH --mem=8000\n")
+    filey.writelines("#SBATCH --mem=10000\n")
     filey.writelines("/home/vsochat/python-lapack-blas/bin/python pyMatch.py --template=" + template + " --images=" + images + " --subs=" + subs + " --output=" + outdir)
     filey.close()
     os.system("sbatch .jobs/" + tmp + ".job")
@@ -58,9 +58,49 @@ for temp in templates:
     filey.writelines("#SBATCH --job-name=" + tmp + "\n")  
     filey.writelines("#SBATCH --output=.out/" + tmp + "-term.out\n")  
     filey.writelines("#SBATCH --error=.out/" + tmp + "-term.err\n")  
-    filey.writelines("#SBATCH --mem=8000\n")
+    filey.writelines("#SBATCH --mem=64000\n")
     filey.writelines("/home/vsochat/python-lapack-blas/bin/python pyMatch.py --template=" + template + " --images=" + images + " --subs=" + subs + " --output=" + outdir)
     filey.close()
     os.system("sbatch .jobs/" + tmp + "-term.job")
+
+
+
+
+# Just print command
+srun -n 10 -N 2 --mem=64000 --pty bash --
+cd /home/vsochat/SCRIPT/python/MRtools
+source /home/vsochat/python-lapack-blas/bin/activate
+python
+import os
+subs = "/home/vsochat/SCRIPT/python/MRtools/input525.txt"
+images = "/home/vsochat/SCRIPT/python/MRtools/images525.txt"
+templatedir = "/scratch/users/vsochat/DATA/BRAINMAP/nsynth525"
+outdir = "/scratch/users/vsochat/DATA/BRAINMAP/output/Matrix525Terms"  # We are calculating percent overlap
+
+# Read in templates
+# Generated with ls /scratch/users/vsochat/DATA/BRAINMAP/nsynth525 -1 >> templates525.txt
+templates = open('templates525.txt','r').readlines()
+
+# Cycle through templates, calculate match scores for all subjects, for each
+idx = list()
+for t in range(0,len(templates)):
+  temp = templates[t]
+  tmp = temp.strip("\n")
+  fname = outdir + "/" + tmp.strip('.gz') + "_beststats.txt"
+  if not os.path.isfile(fname):
+    print str(t) + "NEED TO RUN" + tmp
+    idx.append(t)
+    #template = templatedir + "/" + tmp
+    #os.system("/home/vsochat/python-lapack-blas/bin/python pyMatch.py --template=" + template + " --images=" + images + " --subs=" + subs + " --output=" + outdir)
+  else: 
+    print "SKIPPING " + tmp
+
+for t in idx:
+  temp = templates[t]
+  tmp = temp.strip("\n")
+  fname = outdir + "/" + tmp.strip('.gz') + "_beststats.txt"
+  if not os.path.isfile(fname):
+    template = templatedir + "/" + tmp
+    os.system("/home/vsochat/python-lapack-blas/bin/python pyMatch.py --template=" + template + " --images=" + images + " --subs=" + subs + " --output=" + outdir)
 
 
