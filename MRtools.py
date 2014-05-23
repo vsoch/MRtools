@@ -884,7 +884,7 @@ class Match:
  
         print "\nCalculating overlap scores for each contender image..."
         # Cycle through components and...
-        for com in self.components:
+        for img in self.components:
             # Set activation counter variables to zero
             voxel_in_roi = 0
             # Get the data in coordinate space
