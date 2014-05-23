@@ -902,8 +902,8 @@ class Match:
                   if com.xdim < self.Data.xdim:
                     diff = abs(self.Data.xdim - com.xdim)
                     tempROI = tempROI[1+(diff/2):self.Data.xdim,:,1:self.Data.xdim-(diff/2)]
-                    self.Data.xdim = len(1+(diff/2):self.Data.xdim)
-                    self.Data.zdim = len(1+(diff/2):self.Data.xdim)
+                    self.Data.xdim = len(range(1+(diff/2),self.Data.xdim))
+                    self.Data.zdim = len(range(1+(diff/2),self.Data.xdim))
 
             # Here is the ROI for the component
             compROI = data
