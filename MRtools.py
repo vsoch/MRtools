@@ -586,7 +586,7 @@ class Match:
         self.indexes = []
         self.coordsMNI = []
         self.coordsRCP = []
-        self.components = []                  # List of components (MRtools Data objects) to check
+        self.components = []                  # List of components (paths to images) to check
 
         # Dictionaries to hold all results for one template across components
         self.activation_difference = {}       # Holds score with direction (+/-)
@@ -595,9 +595,9 @@ class Match:
     def __repr__(self):
         return "<Match>" + self.Data
 
-    def addComp(self,MRData):
+    def addComp(self,mrpath):
         '''Match.addComp(MRDataObj) adds a component to the list to be matched'''
-        self.components.append(MRData)        
+        self.components.append(mrpath)        
 
     def clearComp(self):
         '''Match.clearComp() clears component list'''
@@ -884,12 +884,13 @@ class Match:
  
         print "\nCalculating overlap scores for each contender image..."
         # Cycle through components and...
-        for com in self.components:		      
+        for com in self.components:
             # Set activation counter variables to zero
             voxel_in_roi = 0
             # Get the data in coordinate space
-            data = com.getData()  
-            
+            com = MRtools.Data(img,"3D")  
+            data = com.getData()
+
             # Make sure we are in same space
             if [self.Data.xdim,self.Data.ydim,self.Data.zdim] != [com.xdim,com.ydim,com.zdim]:
                 print "ERROR: Template and components have different sizes!\n"
