@@ -893,9 +893,15 @@ class Match:
 
             # Make sure we are in same space
             if [self.Data.xdim,self.Data.ydim,self.Data.zdim] != [com.xdim,com.ydim,com.zdim]:
-                print "ERROR: Template and components have different sizes!\n"
-                print "Register to same space and re-run.  Exiting."
-                sys.exit(32)
+                print "WARNING: Template and components have different sizes!\n"
+                if self.Data.aff[1,1] != com.aff[1,1]:
+                  print "Voxel sizes are different - exiting!"
+                  sys.exit(32)
+                else:
+                  print "Voxel sizes equivalent: attempting to crop smaller image"
+                  if com.xdim < self.Data.xdim:
+                    diff = abs(TMP.xdim - Template.xdim)
+                    tempROI = tempROI[1+(diff/2):self.Data.xdim-(diff/2),:,1:self.Data.xdim-(diff/2)]
 
             # Here is the ROI for the component
             compROI = data
