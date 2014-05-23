@@ -888,7 +888,7 @@ class Match:
             # Set activation counter variables to zero
             voxel_in_roi = 0
             # Get the data in coordinate space
-            com = self.Data(img,"3D")  
+            com = Data(img,"3D")  
             data = com.getData()
 
             # Make sure we are in same space
