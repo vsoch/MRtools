@@ -14,6 +14,7 @@ import pyMatch
 import os.path
 import numpy
 import MRtools
+import sys
 
 temp = sys.argv[1] # temp: is the template image, full path
 subs = sys.argv[2] 
@@ -24,9 +25,6 @@ outdir = sys.argv[5]
 subfile = pyMatch.readInput(subs)
 imgfiles = pyMatch.readInput(images)
 found = pyMatch.checkInput(subfile,imgfiles)
-
-# For each template image, save match scores
-scores = numpy.zeros(shape=(len(templates),len(templates)))
 
 # Make full image paths
 imgs = list()
@@ -61,5 +59,5 @@ if not os.path.isfile(fname):
   # For each match score, add to output file
   for i,score in resultitem.iteritems():
     print "Adding " + i + " " + str(score)
-      Result.addResult(i + "\t" + str(score))
+    Result.addResult(i + "\t" + str(score))
 

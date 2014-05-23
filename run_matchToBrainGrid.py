@@ -23,7 +23,7 @@ for temp in templates:
   jobby.writelines("#SBATCH --error=.out/" + filename + ".err\n")
   jobby.writelines("#SBATCH --time=2-00:00\n")
   jobby.writelines("#SBATCH --mem=8000\n")
-  jobby.writelines("python /scratch/PI/dpwall/SCRIPT/python/MRtools/matchToBrainGrid.py" + temp + images + templatedir + outdir
+  jobby.writelines("python /home/vsochat/SCRIPT/python/MRtools/matchToBrainGrid.py" + " " + temp + " " + subs + " " + images + " " + templatedir + " " + outdir)
   jobby.close()
   os.system("sbatch" + ".jobs/" + filename + ".job")
 
