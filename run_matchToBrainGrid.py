@@ -16,14 +16,15 @@ outdir = "/scratch/users/vsochat/DATA/BRAINMAP/dimensionality_reduction/icaMatch
 
 for temp in templates:
   path, filename = os.path.split(temp)
-  jobby = open(".jobs/" + filename.strip('\n') + ".job",'w')
+  filename = filename.strip('\n')
+  jobby = open(".jobs/" + filename + ".job",'w')
   jobby.writelines("#!/bin/bash\n")
-  jobby.writelines("#SBATCH --job-name=" + filename.strip('\n') + "\n")  
-  jobby.writelines("#SBATCH --output=.out/" + filename.strip('\n') + ".out\n")
-  jobby.writelines("#SBATCH --error=.out/" + filename.strip('\n') + ".err\n")
+  jobby.writelines("#SBATCH --job-name=" + filename + "\n")  
+  jobby.writelines("#SBATCH --output=.out/" + filename + ".out\n")
+  jobby.writelines("#SBATCH --error=.out/" + filename + ".err\n")
   jobby.writelines("#SBATCH --time=2-00:00\n")
   jobby.writelines("#SBATCH --mem=8000\n")
-  jobby.writelines("python /home/vsochat/SCRIPT/python/MRtools/matchToBrainGrid.py" + " " + temp + " " + subs + " " + images + " " + templatedir + " " + outdir)
+  jobby.writelines("python /home/vsochat/SCRIPT/python/MRtools/matchToBrainGrid.py" + " " + temp.strip('\n') + " " + subs + " " + images + " " + templatedir + " " + outdir)
   jobby.close()
-  os.system("sbatch" + " .jobs/" + filename.strip('\n') + ".job")
+  os.system("sbatch" + " .jobs/" + filename + ".job")
 
