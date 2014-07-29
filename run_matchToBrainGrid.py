@@ -27,4 +27,3 @@ for temp in templates:
   jobby.writelines("python /home/vsochat/SCRIPT/python/MRtools/matchToBrainGrid.py" + " " + temp.strip('\n') + " " + subs + " " + images + " " + templatedir + " " + outdir)
   jobby.close()
   os.system("sbatch" + " .jobs/" + filename + ".job")
-
